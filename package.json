@@ -9,11 +9,16 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "typecheck": "nuxi typecheck"
   },
   "dependencies": {
+    "@fontsource/zen-kaku-gothic-new": "^5.2.7",
     "@nuxt/eslint": "^1.13.0",
+    "@nuxt/ui": "^4.4.0",
+    "@nuxtjs/supabase": "^2.0.3",
     "nuxt": "^4.3.0",
+    "tailwindcss": "^4.1.18",
     "vue": "^3.5.27",
     "vue-router": "^4.6.4"
   },
