@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { z } from 'zod'
+import type { FormSubmitEvent } from '@nuxt/ui'
+
 const {
   email,
   password,
@@ -9,12 +12,33 @@ const {
 } = useAuth()
 
 redirectIfAuthenticated()
+
+const loginSchema = z.object({
+  email: z
+    .email('有効なメールアドレスを入力してください'),
+  password: z
+    .string()
+    .min(8, 'パスワードは8文字以上で入力してください')
+})
+
+type LoginSchema = z.output<typeof loginSchema>
+
+const state = reactive({
+  email: '',
+  password: ''
+})
+
+async function onSubmit(event: FormSubmitEvent<LoginSchema>) {
+  email.value = event.data.email
+  password.value = event.data.password
+  await handleAuth()
+}
 </script>
 
 <template>
   <div class="relative min-h-screen overflow-hidden bg-[var(--tana-ink)] text-white">
-    <div class="absolute inset-0 bg-[radial-gradient(900px_circle_at_10%_10%,rgba(249,115,22,0.22),transparent_60%)]"></div>
-    <div class="absolute bottom-[-20%] right-[-10%] h-80 w-80 rounded-full bg-white/10 blur-3xl"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(900px_circle_at_10%_10%,rgba(249,115,22,0.22),transparent_60%)]" />
+    <div class="absolute bottom-[-20%] right-[-10%] h-80 w-80 rounded-full bg-white/10 blur-3xl" />
 
     <UContainer class="relative py-16 lg:py-24">
       <div class="grid gap-10 lg:grid-cols-[1fr_420px] lg:items-center">
@@ -27,7 +51,7 @@ redirectIfAuthenticated()
             セキュアログイン
           </UBadge>
           <h1 class="text-4xl font-bold tracking-tight lg:text-5xl">
-            あなたのブックマークを、<br class="hidden sm:block" />
+            あなたのブックマークを、<br class="hidden sm:block">
             もっと見返しやすく。
           </h1>
           <p class="text-lg text-white/70">
@@ -69,23 +93,25 @@ redirectIfAuthenticated()
             </div>
           </template>
 
-          <form
+          <UForm
+            :schema="loginSchema"
+            :state="state"
             class="space-y-4"
-            @submit.prevent="handleAuth"
+            @submit="onSubmit"
           >
             <UFormField
               label="メールアドレス"
               name="email"
               class="w-full"
               required
+              :ui="{ label: 'text-gray-800 font-medium' }"
             >
               <UInput
-                v-model="email"
+                v-model="state.email"
                 type="email"
                 placeholder="name@example.com"
                 size="lg"
                 :ui="{ root: 'w-full', base: 'w-full bg-white text-[#111] placeholder:text-gray-400' }"
-                required
               />
             </UFormField>
 
@@ -94,14 +120,14 @@ redirectIfAuthenticated()
               name="password"
               class="w-full"
               required
+              :ui="{ label: 'text-gray-800 font-medium' }"
             >
               <UInput
-                v-model="password"
+                v-model="state.password"
                 type="password"
                 placeholder="••••••••"
                 size="lg"
                 :ui="{ root: 'w-full', base: 'w-full bg-white text-[#111] placeholder:text-gray-400' }"
-                required
               />
             </UFormField>
 
@@ -114,7 +140,7 @@ redirectIfAuthenticated()
             >
               {{ isSignUp ? '新規登録して始める' : 'ログインして続ける' }}
             </UButton>
-          </form>
+          </UForm>
 
           <template #footer>
             <div class="text-center">
