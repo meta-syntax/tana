@@ -1,0 +1,16 @@
+@import "@fontsource/zen-kaku-gothic-new/400.css";
+@import "@fontsource/zen-kaku-gothic-new/500.css";
+@import "@fontsource/zen-kaku-gothic-new/700.css";
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+:root {
+  font-family: "Zen Kaku Gothic New", "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  --tana-ink: #0f1117;
+  --tana-ink-soft: #171a22;
+  --tana-accent: #f97316;
+  --tana-accent-strong: #fb923c;
+  --tana-bg: #f6f4f0;
+  --tana-border: #e8e8e8;
+  --tana-muted: rgba(255, 255, 255, 0.7);
+}
