@@ -121,7 +121,7 @@ const handleDelete = () => {
     </div>
 
     <!-- アクションボタン（ホバー時に表示） -->
-    <div class="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+    <div class="absolute right-2 top-2 flex gap-1 opacity-100 transition-opacity duration-200 sm:opacity-0 sm:group-hover:opacity-100">
       <UButton
         icon="i-heroicons-pencil-square"
         size="xs"

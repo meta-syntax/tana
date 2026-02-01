@@ -7,6 +7,11 @@ export default defineAppConfig({
       slots: {
         root: 'w-full',
         base: 'w-full bg-white text-[#111] placeholder:text-gray-400'
+      },
+      variants: {
+        variant: {
+          outline: 'bg-white'
+        }
       }
     },
     button: {
