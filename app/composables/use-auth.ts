@@ -1,3 +1,5 @@
+import { translateSupabaseAuthError } from '~/utils/supabase-auth-error-i18n'
+
 export const useAuth = () => {
   const supabase = useSupabaseClient()
   const user = useSupabaseUser()
@@ -51,7 +53,11 @@ export const useAuth = () => {
         await signIn()
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'An error occurred'
+      console.error(error)
+      const fallback = isSignUp.value
+        ? '登録に失敗しました。時間をおいて再度お試しください。'
+        : 'ログインに失敗しました。時間をおいて再度お試しください。'
+      const message = translateSupabaseAuthError(error, fallback)
       toast.add({
         title: 'エラー',
         description: message,

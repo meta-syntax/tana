@@ -1,6 +1,12 @@
+返答は全て日本語で行うこと
+
 # Tana
 
-返答は全て日本語で行うこと
+```
+Tanaは個人向けブックマーク管理アプリ。Nuxt 4 + Supabaseで構築。
+主な機能は、ブックマークのCRUD、OGP自動取得、検索、ユーザー認証。
+URLを入力するとタイトル・説明・画像を自動取得し、リッチに表示する。RLSでデータ保護。レスポンシブ対応。
+```
 
 ## Tech Stack
 
@@ -19,7 +25,22 @@
 
 **UIはNuxt UIを優先的に使用する**
 
-それ以外の構成はAtomic Designに基づく構成とし、積極的に再利用可能なコンポーネントを作成する
+```
+components/
+├── common/           # 共通コンポーネント（複数ページで再利用）
+├── features/         # 機能単位のコンポーネント
+│   └── bookmark/     # ブックマーク機能
+└── pages/            # ページ固有のコンポーネント
+    ├── dashboard/
+    ├── home/
+    └── login/
+```
+
+| ディレクトリ      | 基準                                       |
+|-------------|------------------------------------------|
+| `common/`   | 複数ページ・機能で再利用される汎用UI                      |
+| `features/` | 特定のドメイン/機能に紐づくが、複数ページで使用される可能性があるコンポーネント |
+| `pages/`    | 特定のページでのみ使用されるコンポーネント                    |
 
 #### composables
 
@@ -79,13 +100,14 @@ const props = withDefaults(defineProps<Props>(), {
 
 - Tailwind CSSを優先
 - カスタムCSSは`assets/css/`
-- カラー変数は統一: `#111`, `#22c55e`, `#e8e8e8` など
+- CSS変数を使用する場合、`var()`は不要: `bg-(--tana-accent)`
+  - **Bad:** `bg-[var(--tana-accent)]`
 
-## Commands
+## Quality
+
+コーディング後は**必須で**以下のコマンドを実行し、エラーがある場合は修正して品質を担保すること。
 
 ```bash
-npm run dev         # 開発サーバー
-npm run build       # ビルド
 npm run lint        # Lint
 npm run typecheck   # Type check
 ```
