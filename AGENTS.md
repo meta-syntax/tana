@@ -76,7 +76,7 @@ components/
 - デフォルト値は`withDefaults`を使用
 
 ```typescript
-// BAD: ランタイムバリデーション
+// ❌ BAD: ランタイムバリデーション
 const props = defineProps({
   tech: {
     type: Object,
@@ -84,7 +84,7 @@ const props = defineProps({
   }
 })
 
-// GOOD: TypeScript型定義
+// ✅ GOOD: TypeScript型定義
 interface Props {
   tech: Tech
   index: number
@@ -96,10 +96,29 @@ const props = withDefaults(defineProps<Props>(), {
 })
 ```
 
-### 5. Styling
+### 5. v-model & defineModel
 
+- `v-model`には`defineModel`を使用する
+
+```typescript
+// ❌ BAD: 手動でprops/emit定義
+const props = defineProps<{ open: boolean }>()
+const emit = defineEmits<{ 'update:open': [value: boolean] }>()
+const isOpen = computed({
+  get: () => props.open,
+  set: value => emit('update:open', value)
+})
+
+// ✅ GOOD: defineModelを使用
+const isOpen = defineModel<boolean>('open', {required: true})
+```
+
+### 6. Styling
+
+- Nuxt UIのデザインシステムに従う
 - Tailwind CSSを優先
-- カスタムCSSは`assets/css/`
+- カスタムCSSは`assets/css/`に配置
+- Nuxt UIのCSS変数を`main.css`で定義し、セマンティッククラス（`text-highlighted`, `bg-default`など）を使用する
 - CSS変数を使用する場合、`var()`は不要: `bg-(--tana-accent)`
   - **Bad:** `bg-[var(--tana-accent)]`
 
