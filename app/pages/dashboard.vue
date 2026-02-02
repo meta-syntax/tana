@@ -5,7 +5,13 @@ definePageMeta({
   layout: 'dashboard'
 })
 
-const { bookmarks, loading, stats, addBookmark, updateBookmark, deleteBookmark } = useBookmarks()
+const { bookmarks, loading, stats, filterBookmarks, addBookmark, updateBookmark, deleteBookmark } = useBookmarks()
+
+// 検索
+const searchQuery = ref('')
+const debouncedQuery = refDebounced(searchQuery, 400)
+
+const filteredBookmarks = computed(() => filterBookmarks(debouncedQuery.value))
 
 // モーダル制御
 const isModalOpen = ref(false)
@@ -58,8 +64,10 @@ const handleDelete = async (bookmark: Bookmark) => {
       <DashboardStats :stats="stats" />
 
       <BookmarkList
-        :bookmarks="bookmarks"
+        v-model:search-query="searchQuery"
+        :bookmarks="filteredBookmarks"
         :loading="loading"
+        :total-count="bookmarks.length"
         @add="openAddModal"
         @edit="openEditModal"
         @delete="handleDelete"

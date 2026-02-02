@@ -133,6 +133,21 @@ export const useBookmarks = () => {
     return true
   }
 
+  // 検索フィルタリング
+  const filterBookmarks = (query: string): Bookmark[] => {
+    if (!query.trim()) return bookmarks.value
+
+    const normalizedQuery = query.toLowerCase()
+    return bookmarks.value.filter((bookmark) => {
+      const title = bookmark.title?.toLowerCase() ?? ''
+      const url = bookmark.url.toLowerCase()
+      const description = bookmark.description?.toLowerCase() ?? ''
+      return title.includes(normalizedQuery)
+        || url.includes(normalizedQuery)
+        || description.includes(normalizedQuery)
+    })
+  }
+
   // 統計情報を計算
   const stats = computed(() => {
     const total = bookmarks.value.length
@@ -150,6 +165,7 @@ export const useBookmarks = () => {
     bookmarks,
     loading,
     stats,
+    filterBookmarks,
     refreshBookmarks,
     addBookmark,
     updateBookmark,
