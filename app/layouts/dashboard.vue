@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { VNode } from 'vue'
-
 const { user, signOut, redirectIfUnauthenticated } = useAuth()
 
 redirectIfUnauthenticated()
@@ -8,13 +6,27 @@ redirectIfUnauthenticated()
 defineSlots<{
   default(): VNode[]
 }>()
+
+const signingOut = ref(false)
+
+const handleSignOut = async () => {
+  if (signingOut.value) return
+
+  signingOut.value = true
+  try {
+    await signOut()
+  } finally {
+    signingOut.value = false
+  }
+}
 </script>
 
 <template>
   <div class="min-h-screen bg-(--tana-bg)">
     <DashboardHeader
       :user-email="user?.email"
-      @sign-out="signOut"
+      :signing-out="signingOut"
+      @sign-out="handleSignOut"
     />
     <slot />
   </div>

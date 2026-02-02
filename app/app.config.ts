@@ -6,7 +6,18 @@ export default defineAppConfig({
     input: {
       slots: {
         root: 'w-full',
-        base: 'w-full bg-white text-[#111] placeholder:text-gray-400'
+        base: 'w-full bg-white text-[#111] placeholder:text-gray-400 selection:bg-orange-200 selection:text-[#111]'
+      },
+      variants: {
+        variant: {
+          outline: 'bg-white'
+        }
+      }
+    },
+    textarea: {
+      slots: {
+        root: 'w-full',
+        base: 'w-full bg-white text-[#111] placeholder:text-gray-400 selection:bg-orange-200 selection:text-[#111]'
       },
       variants: {
         variant: {

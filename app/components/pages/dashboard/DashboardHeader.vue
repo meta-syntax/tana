@@ -1,9 +1,12 @@
 <script setup lang="ts">
 interface Props {
   userEmail?: string | null
+  signingOut?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  signingOut: false
+})
 
 const emit = defineEmits<{
   signOut: []
@@ -33,6 +36,8 @@ const emit = defineEmits<{
           <UButton
             variant="ghost"
             class="border border-white/20 text-white hover:bg-white/10"
+            :loading="props.signingOut"
+            :disabled="props.signingOut"
             @click="emit('signOut')"
           >
             ログアウト

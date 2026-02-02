@@ -1,37 +1,41 @@
 <script setup lang="ts">
 interface Props {
-  open: boolean
   title: string
 }
 
 const props = defineProps<Props>()
 
 const emit = defineEmits<{
-  'update:open': [value: boolean]
-  'confirm': []
+  confirm: []
 }>()
 
-const isOpen = computed({
-  get: () => props.open,
-  set: value => emit('update:open', value)
-})
+const isOpen = defineModel<boolean>('open', { required: true })
 
 const modalTitle = 'ブックマークを削除'
 const modalDescription = computed(() => (
   `「${props.title}」を削除しますか？この操作は取り消せません。`
 ))
 
+const loading = ref(false)
+
 const handleConfirm = () => {
-  isOpen.value = false
+  if (loading.value) return
+
+  loading.value = true
   emit('confirm')
 }
+
+// モーダルが閉じられたらloadingをリセット
+watch(isOpen, (open) => {
+  if (!open) {
+    loading.value = false
+  }
+})
 </script>
 
 <template>
   <UModal
     v-model:open="isOpen"
-    :title="modalTitle"
-    :description="modalDescription"
   >
     <template #content>
       <div class="p-6">
@@ -43,10 +47,10 @@ const handleConfirm = () => {
             />
           </div>
           <div class="flex-1">
-            <h3 class="text-lg font-semibold text-(--tana-ink)">
+            <h3 class="text-lg font-semibold text-highlighted">
               {{ modalTitle }}
             </h3>
-            <p class="mt-2 text-sm text-gray-500">
+            <p class="mt-2 text-sm text-muted">
               {{ modalDescription }}
             </p>
           </div>
@@ -55,12 +59,15 @@ const handleConfirm = () => {
           <UButton
             variant="ghost"
             color="neutral"
+            :disabled="loading"
             @click="isOpen = false"
           >
             キャンセル
           </UButton>
           <UButton
             color="error"
+            :loading="loading"
+            :disabled="loading"
             @click="handleConfirm"
           >
             削除する

@@ -1,16 +1,11 @@
 <script setup lang="ts">
 import type { Bookmark, BookmarkInput } from '~/types'
 
-const { bookmarks, loading, stats, fetchBookmarks, addBookmark, updateBookmark, deleteBookmark } = useBookmarks()
-
 definePageMeta({
   layout: 'dashboard'
 })
 
-// ブックマーク取得
-onMounted(() => {
-  fetchBookmarks()
-})
+const { bookmarks, loading, stats, addBookmark, updateBookmark, deleteBookmark } = useBookmarks()
 
 // モーダル制御
 const isModalOpen = ref(false)
@@ -43,8 +38,17 @@ const handleSave = async (data: BookmarkInput) => {
 }
 
 // 削除処理
+const deleting = ref(false)
+
 const handleDelete = async (bookmark: Bookmark) => {
-  await deleteBookmark(bookmark.id)
+  if (deleting.value) return
+
+  deleting.value = true
+  try {
+    await deleteBookmark(bookmark.id)
+  } finally {
+    deleting.value = false
+  }
 }
 </script>
 

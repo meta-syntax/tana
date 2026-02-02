@@ -5,40 +5,37 @@ export const useBookmarks = () => {
   const user = useSupabaseUser()
   const toast = useToast()
 
-  const bookmarks = ref<Bookmark[]>([])
-  const loading = ref(false)
+  // useLazyAsyncDataでSSR + CSR両方でフェッチ
+  const { data: bookmarks, status, refresh: refreshBookmarks } = useLazyAsyncData(
+    'bookmarks',
+    async () => {
+      if (!user.value?.sub) return []
 
-  const fetchBookmarks = async () => {
-    if (!user.value?.sub) return
+      const { data, error } = await supabase
+        .from('bookmarks')
+        .select('*')
+        .order('created_at', { ascending: false })
 
-    loading.value = true
+      if (error) {
+        console.error('Failed to fetch bookmarks:', error)
+        throw error
+      }
 
-    const { data, error } = await supabase
-      .from('bookmarks')
-      .select('*')
-      .order('created_at', { ascending: false })
-
-    loading.value = false
-
-    if (error) {
-      console.error('Failed to fetch bookmarks:', error)
-      toast.add({
-        title: 'エラー',
-        description: 'ブックマークの取得に失敗しました',
-        color: 'error'
-      })
-      return
+      return (data ?? []) as Bookmark[]
+    },
+    {
+      default: () => [] as Bookmark[],
+      watch: [user] // ユーザーが変わったら再フェッチ
     }
+  )
 
-    bookmarks.value = (data ?? []) as Bookmark[]
-  }
+  // ローディング状態
+  const loading = computed(() => status.value === 'pending')
 
   const addBookmark = async (input: BookmarkInput): Promise<boolean> => {
     if (!user.value?.sub) return false
 
-    loading.value = true
-
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('bookmarks')
       .insert({
         user_id: user.value.sub,
@@ -47,10 +44,6 @@ export const useBookmarks = () => {
         description: input.description || null,
         thumbnail_url: input.thumbnail_url || null
       })
-      .select()
-      .single()
-
-    loading.value = false
 
     if (error) {
       console.error('Failed to add bookmark:', error)
@@ -62,7 +55,8 @@ export const useBookmarks = () => {
       return false
     }
 
-    bookmarks.value.unshift(data as Bookmark)
+    // キャッシュを再取得
+    await refreshBookmarks()
 
     toast.add({
       title: '追加完了',
@@ -76,9 +70,7 @@ export const useBookmarks = () => {
   const updateBookmark = async (id: string, input: Partial<BookmarkInput>): Promise<boolean> => {
     if (!user.value?.sub) return false
 
-    loading.value = true
-
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('bookmarks')
       .update({
         url: input.url,
@@ -88,10 +80,6 @@ export const useBookmarks = () => {
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
-      .select()
-      .single()
-
-    loading.value = false
 
     if (error) {
       console.error('Failed to update bookmark:', error)
@@ -103,10 +91,8 @@ export const useBookmarks = () => {
       return false
     }
 
-    const index = bookmarks.value.findIndex((b: Bookmark) => b.id === id)
-    if (index !== -1) {
-      bookmarks.value[index] = data as Bookmark
-    }
+    // キャッシュを再取得
+    await refreshBookmarks()
 
     toast.add({
       title: '更新完了',
@@ -120,14 +106,10 @@ export const useBookmarks = () => {
   const deleteBookmark = async (id: string): Promise<boolean> => {
     if (!user.value?.sub) return false
 
-    loading.value = true
-
     const { error } = await supabase
       .from('bookmarks')
       .delete()
       .eq('id', id)
-
-    loading.value = false
 
     if (error) {
       console.error('Failed to delete bookmark:', error)
@@ -139,7 +121,8 @@ export const useBookmarks = () => {
       return false
     }
 
-    bookmarks.value = bookmarks.value.filter((b: Bookmark) => b.id !== id)
+    // キャッシュを再取得
+    await refreshBookmarks()
 
     toast.add({
       title: '削除完了',
@@ -167,7 +150,7 @@ export const useBookmarks = () => {
     bookmarks,
     loading,
     stats,
-    fetchBookmarks,
+    refreshBookmarks,
     addBookmark,
     updateBookmark,
     deleteBookmark
