@@ -18,6 +18,8 @@
     "@nuxt/eslint": "^1.13.0",
     "@nuxt/ui": "^4.4.0",
     "@nuxtjs/supabase": "^2.0.3",
+    "@vueuse/core": "^14.2.0",
+    "@vueuse/nuxt": "^14.2.0",
     "metascraper": "^5.49.21",
     "metascraper-description": "^5.49.21",
     "metascraper-image": "^5.49.21",

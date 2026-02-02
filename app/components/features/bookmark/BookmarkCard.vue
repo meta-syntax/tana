@@ -12,44 +12,25 @@ const emit = defineEmits<{
   delete: [bookmark: Bookmark]
 }>()
 
-// URLからドメインを抽出
+// 表示用データの計算
+const displayTitle = computed(() => props.bookmark.title || props.bookmark.url)
+
 const displayUrl = computed(() => {
   try {
-    const url = new URL(props.bookmark.url)
-    return url.hostname
+    return new URL(props.bookmark.url).hostname
   } catch {
     return props.bookmark.url
   }
 })
 
-// 相対時間を計算
-const relativeTime = computed(() => {
-  if (!props.bookmark.created_at) return ''
-  const date = new Date(props.bookmark.created_at)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-  const diffMinutes = Math.floor(diffMs / (1000 * 60))
+// 相対時間（クライアントサイドのみ）
+const { relativeTime, updateRelativeTime } = useRelativeTime(
+  computed(() => props.bookmark.created_at)
+)
 
-  if (diffDays > 30) {
-    return date.toLocaleDateString('ja-JP')
-  } else if (diffDays > 0) {
-    return `${diffDays}日前`
-  } else if (diffHours > 0) {
-    return `${diffHours}時間前`
-  } else if (diffMinutes > 0) {
-    return `${diffMinutes}分前`
-  } else {
-    return 'たった今'
-  }
-})
+onMounted(updateRelativeTime)
 
-// 表示タイトル
-const displayTitle = computed(() => {
-  return props.bookmark.title || props.bookmark.url
-})
-
+// 削除モーダル
 const isDeleteModalOpen = ref(false)
 
 const handleDelete = () => {
@@ -62,33 +43,12 @@ const handleDelete = () => {
   <div
     class="group relative overflow-hidden rounded-xl border border-(--tana-border) bg-white transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
   >
-    <!-- サムネイル -->
-    <a
-      :href="bookmark.url"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="block"
-    >
-      <div class="relative aspect-video overflow-hidden bg-gray-100">
-        <img
-          v-if="bookmark.thumbnail_url"
-          :src="bookmark.thumbnail_url"
-          :alt="displayTitle"
-          class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-        >
-        <div
-          v-else
-          class="flex h-full w-full items-center justify-center bg-linear-to-br from-gray-50 to-gray-100"
-        >
-          <UIcon
-            name="i-heroicons-link"
-            class="size-12 text-gray-300"
-          />
-        </div>
-      </div>
-    </a>
+    <BookmarkThumbnail
+      :url="bookmark.url"
+      :thumbnail-url="bookmark.thumbnail_url"
+      :title="displayTitle"
+    />
 
-    <!-- コンテンツ -->
     <div class="p-4">
       <a
         :href="bookmark.url"
@@ -108,37 +68,16 @@ const handleDelete = () => {
         {{ bookmark.description }}
       </p>
 
-      <div class="mt-3 flex items-center justify-between text-xs text-gray-400">
-        <span class="flex items-center gap-1">
-          <UIcon
-            name="i-heroicons-globe-alt"
-            class="size-3.5"
-          />
-          {{ displayUrl }}
-        </span>
-        <span>{{ relativeTime }}</span>
-      </div>
+      <BookmarkMeta
+        :domain="displayUrl"
+        :relative-time="relativeTime"
+      />
     </div>
 
-    <!-- アクションボタン（ホバー時に表示） -->
-    <div class="absolute right-2 top-2 flex gap-1 opacity-100 transition-opacity duration-200 sm:opacity-0 sm:group-hover:opacity-100">
-      <UButton
-        icon="i-heroicons-pencil-square"
-        size="xs"
-        color="neutral"
-        variant="solid"
-        class="bg-white/90 shadow-sm backdrop-blur-sm hover:bg-white"
-        @click.prevent="emit('edit', bookmark)"
-      />
-      <UButton
-        icon="i-heroicons-trash"
-        size="xs"
-        color="error"
-        variant="solid"
-        class="bg-white/90 shadow-sm backdrop-blur-sm hover:bg-red-50"
-        @click.prevent="isDeleteModalOpen = true"
-      />
-    </div>
+    <BookmarkActions
+      @edit="emit('edit', bookmark)"
+      @delete="isDeleteModalOpen = true"
+    />
 
     <BookmarkDeleteModal
       v-model:open="isDeleteModalOpen"

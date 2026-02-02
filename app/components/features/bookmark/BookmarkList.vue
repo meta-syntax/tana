@@ -4,94 +4,119 @@ import type { Bookmark } from '~/types'
 interface Props {
   bookmarks: Bookmark[]
   loading: boolean
+  totalCount: number
 }
 
 const props = defineProps<Props>()
+
+const searchQuery = defineModel<string>('searchQuery', { default: '' })
 
 const emit = defineEmits<{
   add: []
   edit: [bookmark: Bookmark]
   delete: [bookmark: Bookmark]
 }>()
+
+// 検索状態の管理
+const isSearching = ref(false)
+const displayedBookmarks = ref<Bookmark[]>([])
+const lastAppliedQuery = ref('')
+
+// props.bookmarksの変更を検知（debounce後に発火）
+watch(
+  () => props.bookmarks,
+  (newBookmarks) => {
+    if (searchQuery.value.trim()) {
+      // 検索クエリがある場合はアニメーション演出
+      isSearching.value = true
+      setTimeout(() => {
+        displayedBookmarks.value = newBookmarks
+        lastAppliedQuery.value = searchQuery.value
+        isSearching.value = false
+      }, 300)
+    } else {
+      // 検索クリア時は即座に表示
+      displayedBookmarks.value = newBookmarks
+      lastAppliedQuery.value = ''
+      isSearching.value = false
+    }
+  },
+  { immediate: true }
+)
+
+// 検索結果が0件かどうか
+const isSearchEmpty = computed(() =>
+  !isSearching.value && lastAppliedQuery.value.trim() !== '' && displayedBookmarks.value.length === 0
+)
+
+// 検索結果の件数表示
+const searchResultText = computed(() => {
+  if (!lastAppliedQuery.value.trim()) return ''
+  return `${displayedBookmarks.value.length}件の結果`
+})
+
+// 表示する状態を決定
+const displayState = computed(() => {
+  if (props.loading && props.bookmarks.length === 0) return 'initial-loading'
+  if (isSearching.value) return 'searching'
+  if (isSearchEmpty.value) return 'search-empty'
+  if (!props.loading && props.totalCount === 0) return 'initial-empty'
+  return 'list'
+})
 </script>
 
 <template>
-  <UCard class="border border-(--tana-border) bg-white">
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <div class="space-y-1">
-        <h2 class="text-xl font-bold text-(--tana-ink)">
-          ブックマーク一覧
-        </h2>
-        <p class="text-sm text-gray-500">
-          保存したURLがここに表示されます
-        </p>
-      </div>
-      <UButton
-        icon="i-heroicons-plus"
-        class="bg-(--tana-accent) text-white hover:bg-(--tana-accent-strong)"
-        @click="emit('add')"
-      >
-        URLを追加
-      </UButton>
-    </div>
-  </UCard>
+  <BookmarkListHeader @add="emit('add')" />
 
-  <div
-    v-if="props.loading && props.bookmarks.length === 0"
-    class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-  >
-    <div
-      v-for="i in 6"
-      :key="i"
-      class="overflow-hidden rounded-xl border border-(--tana-border) bg-white"
-    >
-      <div class="aspect-video animate-pulse bg-gray-100" />
-      <div class="space-y-3 p-4">
-        <div class="h-5 w-3/4 animate-pulse rounded bg-gray-100" />
-        <div class="h-4 w-full animate-pulse rounded bg-gray-100" />
-        <div class="flex justify-between">
-          <div class="h-3 w-24 animate-pulse rounded bg-gray-100" />
-          <div class="h-3 w-16 animate-pulse rounded bg-gray-100" />
-        </div>
-      </div>
-    </div>
-  </div>
+  <BookmarkSearchBar
+    v-model="searchQuery"
+    :is-searching="isSearching"
+    :search-result-text="searchResultText"
+  />
 
-  <div
-    v-else-if="!props.loading && props.bookmarks.length === 0"
-    class="rounded-2xl border border-dashed border-(--tana-border) bg-white p-12 text-center"
-  >
-    <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-(--tana-accent)/10">
-      <UIcon
-        name="i-heroicons-bookmark"
-        class="size-8 text-(--tana-accent)"
-      />
-    </div>
-    <h3 class="text-lg font-semibold text-(--tana-ink)">
-      ブックマークがありません
-    </h3>
-    <p class="mt-2 text-sm text-gray-500">
-      「URLを追加」ボタンから最初のブックマークを保存しましょう
-    </p>
-    <UButton
-      icon="i-heroicons-plus"
-      class="mt-6 bg-(--tana-accent) text-white hover:bg-(--tana-accent-strong)"
-      @click="emit('add')"
-    >
-      最初のブックマークを追加
-    </UButton>
-  </div>
+  <BookmarkLoadingState
+    v-if="displayState === 'initial-loading'"
+    type="initial"
+  />
 
-  <div
+  <BookmarkLoadingState
+    v-else-if="displayState === 'searching'"
+    type="searching"
+  />
+
+  <BookmarkEmptyState
+    v-else-if="displayState === 'search-empty'"
+    type="search"
+    :search-query="lastAppliedQuery"
+    @clear-search="searchQuery = ''"
+  />
+
+  <BookmarkEmptyState
+    v-else-if="displayState === 'initial-empty'"
+    type="initial"
+    @add="emit('add')"
+  />
+
+  <TransitionGroup
     v-else
+    tag="div"
     class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+    enter-active-class="transition-all duration-300 ease-out"
+    enter-from-class="opacity-0 scale-95"
+    enter-to-class="opacity-100 scale-100"
+    leave-active-class="transition-all duration-200 ease-in"
+    leave-from-class="opacity-100 scale-100"
+    leave-to-class="opacity-0 scale-95"
+    move-class="transition-all duration-300 ease-out"
   >
     <BookmarkCard
-      v-for="bookmark in props.bookmarks"
+      v-for="(bookmark, index) in displayedBookmarks"
       :key="bookmark.id"
       :bookmark="bookmark"
+      :style="{ animationDelay: `${index * 50}ms` }"
+      class="animate-fade-in"
       @edit="emit('edit', $event)"
       @delete="emit('delete', $event)"
     />
-  </div>
+  </TransitionGroup>
 </template>
