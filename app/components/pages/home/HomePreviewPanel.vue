@@ -56,6 +56,9 @@ const previewItems = [
             <img
               :src="item.thumbnail"
               :alt="item.title"
+              loading="lazy"
+              width="600"
+              height="314"
               class="h-full w-full object-cover"
             >
           </div>

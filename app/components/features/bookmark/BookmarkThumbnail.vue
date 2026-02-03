@@ -20,6 +20,9 @@ defineProps<Props>()
         v-if="thumbnailUrl"
         :src="thumbnailUrl"
         :alt="title"
+        loading="lazy"
+        width="640"
+        height="360"
         class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
       >
       <div

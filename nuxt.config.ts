@@ -32,6 +32,21 @@ export default defineNuxtConfig({
   },
   compatibilityDate: '2025-07-15',
 
+  nitro: {
+    compressPublicAssets: true,
+    prerender: {
+      routes: ['/'],
+      crawlLinks: true
+    },
+    routeRules: {
+      '/_nuxt/**': {
+        headers: {
+          'Cache-Control': 'public, max-age=31536000, immutable'
+        }
+      }
+    }
+  },
+
   eslint: {
     config: {
       stylistic: {
