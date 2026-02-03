@@ -10,3 +10,15 @@ export interface BookmarkInput {
   description?: string | null
   thumbnail_url?: string | null
 }
+
+/** ソート対象フィールド */
+export type SortField = 'created_at' | 'title' | 'url'
+
+/** ソート順 */
+export type SortOrder = 'asc' | 'desc'
+
+/** ソート設定 */
+export interface BookmarkSort {
+  field: SortField
+  order: SortOrder
+}

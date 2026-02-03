@@ -1,36 +1,111 @@
-import type { Bookmark, BookmarkInput, Database } from '~/types'
+import type { Bookmark, BookmarkInput, BookmarkSort, Database } from '~/types'
 
 export const useBookmarks = () => {
   const supabase = useSupabaseClient<Database>()
   const user = useSupabaseUser()
   const toast = useToast()
 
-  // useLazyAsyncDataでSSR + CSR両方でフェッチ
-  const { data: bookmarks, status, refresh: refreshBookmarks } = useLazyAsyncData(
+  // ページネーション・検索・ソート状態
+  const page = ref(1)
+  const perPage = ref(12)
+  const searchQuery = ref('')
+  const sort = ref<BookmarkSort>({ field: 'created_at', order: 'desc' })
+
+  // ブックマーク取得（サーバーサイドページネーション + 検索 + ソート）
+  // totalCountもペイロードに含めるため、itemsとtotalをまとめて返す
+  const { data: bookmarkData, status, refresh: refreshBookmarks } = useLazyAsyncData(
     'bookmarks',
     async () => {
-      if (!user.value?.sub) return []
+      if (!user.value?.sub) return { items: [] as Bookmark[], total: 0 }
 
-      const { data, error } = await supabase
+      const from = (page.value - 1) * perPage.value
+      const to = from + perPage.value - 1
+
+      let query = supabase
         .from('bookmarks')
-        .select('*')
-        .order('created_at', { ascending: false })
+        .select('*', { count: 'exact' })
+
+      // 検索
+      if (searchQuery.value.trim()) {
+        const q = searchQuery.value.trim().replace(/[%_]/g, '\\$&')
+        query = query.or(`title.ilike.%${q}%,url.ilike.%${q}%,description.ilike.%${q}%`)
+      }
+
+      // ソート
+      query = query.order(sort.value.field, { ascending: sort.value.order === 'asc' })
+
+      // ページネーション
+      query = query.range(from, to)
+
+      const { data, error, count } = await query
 
       if (error) {
         console.error('Failed to fetch bookmarks:', error)
         throw error
       }
 
-      return (data ?? []) as Bookmark[]
+      return { items: (data ?? []) as Bookmark[], total: count ?? 0 }
     },
     {
-      default: () => [] as Bookmark[],
-      watch: [user] // ユーザーが変わったら再フェッチ
+      default: () => ({ items: [] as Bookmark[], total: 0 }),
+      watch: [user, page, sort]
     }
   )
 
+  // ペイロードから復元される computed
+  const bookmarks = computed({
+    get: () => bookmarkData.value.items,
+    set: (val) => { bookmarkData.value = { ...bookmarkData.value, items: val } }
+  })
+  const totalCount = computed(() => bookmarkData.value.total)
+
   // ローディング状態
   const loading = computed(() => status.value === 'pending')
+
+  // 統計情報（軽量取得）
+  const { data: stats, refresh: refreshStats } = useLazyAsyncData(
+    'bookmark-stats',
+    async () => {
+      if (!user.value?.sub) return { total: 0, thisWeek: 0 }
+
+      // 総件数
+      const { count: total } = await supabase
+        .from('bookmarks')
+        .select('*', { count: 'exact', head: true })
+
+      // 今週の追加数
+      const oneWeekAgo = new Date()
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
+      const { count: thisWeek } = await supabase
+        .from('bookmarks')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', oneWeekAgo.toISOString())
+
+      return { total: total ?? 0, thisWeek: thisWeek ?? 0 }
+    },
+    {
+      default: () => ({ total: 0, thisWeek: 0 }),
+      watch: [user]
+    }
+  )
+
+  // 検索実行（page=1にリセット + refresh）
+  const search = (query: string) => {
+    searchQuery.value = query
+    page.value = 1
+    refreshBookmarks()
+  }
+
+  // ソート変更
+  const changeSort = (newSort: BookmarkSort) => {
+    sort.value = newSort
+    page.value = 1
+  }
+
+  // ページ変更
+  const changePage = (newPage: number) => {
+    page.value = newPage
+  }
 
   const addBookmark = async (input: BookmarkInput): Promise<boolean> => {
     if (!user.value?.sub) return false
@@ -71,7 +146,7 @@ export const useBookmarks = () => {
     }
 
     // サーバーの正式なIDに同期
-    await refreshBookmarks()
+    await Promise.all([refreshBookmarks(), refreshStats()])
 
     toast.add({
       title: '追加完了',
@@ -118,6 +193,8 @@ export const useBookmarks = () => {
       return false
     }
 
+    await refreshBookmarks()
+
     toast.add({
       title: '更新完了',
       description: 'ブックマークを更新しました',
@@ -153,6 +230,13 @@ export const useBookmarks = () => {
       return false
     }
 
+    // 現在ページが空になったら前ページへ戻る
+    if (bookmarks.value.length === 0 && page.value > 1) {
+      page.value -= 1
+    }
+
+    await Promise.all([refreshBookmarks(), refreshStats()])
+
     toast.add({
       title: '削除完了',
       description: 'ブックマークを削除しました',
@@ -162,39 +246,17 @@ export const useBookmarks = () => {
     return true
   }
 
-  // 検索フィルタリング
-  const filterBookmarks = (query: string): Bookmark[] => {
-    if (!query.trim()) return bookmarks.value
-
-    const normalizedQuery = query.toLowerCase()
-    return bookmarks.value.filter((bookmark) => {
-      const title = bookmark.title?.toLowerCase() ?? ''
-      const url = bookmark.url.toLowerCase()
-      const description = bookmark.description?.toLowerCase() ?? ''
-      return title.includes(normalizedQuery)
-        || url.includes(normalizedQuery)
-        || description.includes(normalizedQuery)
-    })
-  }
-
-  // 統計情報を計算
-  const stats = computed(() => {
-    const total = bookmarks.value.length
-    const pendingOgp = bookmarks.value.filter((b: Bookmark) => !b.thumbnail_url && !b.title).length
-
-    // 今週の追加数を計算
-    const oneWeekAgo = new Date()
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
-    const thisWeek = bookmarks.value.filter((b: Bookmark) => b.created_at && new Date(b.created_at) >= oneWeekAgo).length
-
-    return { total, pendingOgp, thisWeek }
-  })
-
   return {
     bookmarks,
     loading,
     stats,
-    filterBookmarks,
+    page,
+    perPage,
+    totalCount,
+    sort,
+    search,
+    changeSort,
+    changePage,
     refreshBookmarks,
     addBookmark,
     updateBookmark,

@@ -8,7 +8,7 @@ body {
   background-color: var(--tana-ink);
 }
 
-/* Scrollbar styling */
+/* Scrollbar styling (desktop browsers) */
 html {
   scrollbar-color: #888078 #f0ede8;
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Bookmark, BookmarkInput } from '~/types'
+import type { Bookmark, BookmarkInput, BookmarkSort } from '~/types'
 
 definePageMeta({
   layout: 'dashboard'
@@ -10,13 +10,30 @@ useSeoMeta({
   robots: 'noindex, nofollow'
 })
 
-const { bookmarks, loading, stats, filterBookmarks, addBookmark, updateBookmark, deleteBookmark } = useBookmarks()
+const {
+  bookmarks, loading, stats,
+  page, perPage, totalCount, sort,
+  search, changeSort, changePage,
+  addBookmark, updateBookmark, deleteBookmark
+} = useBookmarks()
 
-// 検索
+// 検索（debounce付き）
 const searchQuery = ref('')
 const debouncedQuery = refDebounced(searchQuery, 400)
 
-const filteredBookmarks = computed(() => filterBookmarks(debouncedQuery.value))
+watch(debouncedQuery, (query) => {
+  search(query)
+})
+
+// ソート変更
+const handleSortChange = (newSort: BookmarkSort) => {
+  changeSort(newSort)
+}
+
+// ページ変更
+const handlePageChange = (newPage: number) => {
+  changePage(newPage)
+}
 
 // モーダル制御
 const isModalOpen = ref(false)
@@ -34,7 +51,7 @@ const openEditModal = (bookmark: Bookmark) => {
 
 // 保存処理
 const handleSave = async (data: BookmarkInput) => {
-  let success = false
+  let success: boolean
 
   if (editingBookmark.value) {
     success = await updateBookmark(editingBookmark.value.id, data)
@@ -64,18 +81,22 @@ const handleDelete = async (bookmark: Bookmark) => {
 </script>
 
 <template>
-  <main class="py-8">
+  <main class="py-4 sm:py-8">
     <UContainer class="space-y-6">
-      <DashboardStats :stats="stats" />
-
       <BookmarkList
         v-model:search-query="searchQuery"
-        :bookmarks="filteredBookmarks"
+        :bookmarks="bookmarks"
         :loading="loading"
-        :total-count="bookmarks.length"
+        :total-count="totalCount"
+        :page="page"
+        :per-page="perPage"
+        :sort="sort"
+        :stats="stats"
         @add="openAddModal"
         @edit="openEditModal"
         @delete="handleDelete"
+        @update:page="handlePageChange"
+        @update:sort="handleSortChange"
       />
     </UContainer>
 
