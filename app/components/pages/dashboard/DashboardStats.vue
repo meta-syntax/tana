@@ -23,20 +23,20 @@ const props = defineProps<Props>()
           {{ props.stats.total }}
         </p>
         <p class="text-xs text-gray-400">
-          {{ props.stats.total === 0 ? '最初のURLを保存しましょう' : '件のブックマークを保存中' }}
+          {{ props.stats.total === 0 ? 'まだブックマークがありません' : '件を保存中' }}
         </p>
       </div>
     </UCard>
     <UCard class="border border-(--tana-border) bg-white">
       <div class="space-y-2">
         <p class="text-sm text-gray-500">
-          OGP取得待ち
+          情報の取得待ち
         </p>
         <p class="text-3xl font-bold text-(--tana-ink)">
           {{ props.stats.pendingOgp }}
         </p>
         <p class="text-xs text-gray-400">
-          {{ props.stats.pendingOgp === 0 ? 'すべて取得済み' : '自動補完を待っています' }}
+          {{ props.stats.pendingOgp === 0 ? 'すべて取得ずみ' : '件が処理待ち' }}
         </p>
       </div>
     </UCard>
@@ -49,7 +49,7 @@ const props = defineProps<Props>()
           {{ props.stats.thisWeek }}
         </p>
         <p class="text-xs text-gray-400">
-          {{ props.stats.thisWeek === 0 ? 'まずは数件から' : '件を今週追加しました' }}
+          {{ props.stats.thisWeek === 0 ? '今週はまだ追加なし' : '件を追加' }}
         </p>
       </div>
     </UCard>

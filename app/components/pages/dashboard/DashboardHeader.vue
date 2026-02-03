@@ -20,13 +20,13 @@ const emit = defineEmits<{
       <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div class="space-y-2">
           <p class="text-sm text-white/60">
-            ようこそ、Tanaへ
+            Tana
           </p>
           <h1 class="text-3xl font-bold lg:text-4xl">
             ダッシュボード
           </h1>
           <p class="text-white/70">
-            保存したブックマークを、素早く検索・整理できます。
+            あなたのブックマークを管理
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-4">
@@ -35,7 +35,7 @@ const emit = defineEmits<{
           </div>
           <UButton
             variant="ghost"
-            class="border border-white/20 text-white hover:bg-white/10"
+            class="border border-white/20 text-white hover:bg-white/10 hover:text-white"
             :loading="props.signingOut"
             :disabled="props.signingOut"
             @click="emit('signOut')"

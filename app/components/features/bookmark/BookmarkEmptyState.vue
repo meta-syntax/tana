@@ -28,7 +28,7 @@ const isSearchEmpty = computed(() => props.type === 'search')
         検索結果がありません
       </h3>
       <p class="mt-2 text-sm text-gray-500">
-        「{{ searchQuery }}」に一致するブックマークが見つかりませんでした
+        「{{ searchQuery }}」に一致するブックマークはありません
       </p>
       <UButton
         variant="outline"
@@ -51,7 +51,7 @@ const isSearchEmpty = computed(() => props.type === 'search')
         ブックマークがありません
       </h3>
       <p class="mt-2 text-sm text-gray-500">
-        「URLを追加」ボタンから最初のブックマークを保存しましょう
+        URLを追加して、最初のブックマークを保存しましょう
       </p>
       <UButton
         icon="i-heroicons-plus"

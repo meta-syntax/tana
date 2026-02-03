@@ -5,59 +5,25 @@ export const useAuth = () => {
   const user = useSupabaseUser()
   const toast = useToast()
 
-  const email = ref('')
-  const password = ref('')
-  const isSignUp = ref(false)
   const loading = ref(false)
 
-  const signUp = async () => {
-    const { error } = await supabase.auth.signUp({
-      email: email.value,
-      password: password.value
-    })
-
-    if (error) throw error
-
-    toast.add({
-      title: '登録完了',
-      description: 'ログインしてください',
-      color: 'success'
-    })
-
-    isSignUp.value = false
-    email.value = ''
-    password.value = ''
-  }
-
-  const signIn = async () => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email.value,
-      password: password.value
-    })
-
-    if (error) throw error
-  }
-
-  const signOut = async () => {
-    await supabase.auth.signOut()
-    await navigateTo('/login')
-  }
-
-  const handleAuth = async () => {
+  const signUp = async (email: string, password: string) => {
     loading.value = true
 
     try {
-      if (isSignUp.value) {
-        await signUp()
-      } else {
-        await signIn()
-      }
+      const { error } = await supabase.auth.signUp({ email, password })
+      if (error) throw error
+
+      toast.add({
+        title: '登録完了',
+        description: 'ログインしてください',
+        color: 'success'
+      })
+
+      await navigateTo('/login')
     } catch (error) {
       console.error(error)
-      const fallback = isSignUp.value
-        ? '登録に失敗しました。時間をおいて再度お試しください。'
-        : 'ログインに失敗しました。時間をおいて再度お試しください。'
-      const message = translateSupabaseAuthError(error, fallback)
+      const message = translateSupabaseAuthError(error, '登録に失敗しました。時間をおいて再度お試しください。')
       toast.add({
         title: 'エラー',
         description: message,
@@ -66,6 +32,30 @@ export const useAuth = () => {
     } finally {
       loading.value = false
     }
+  }
+
+  const signIn = async (email: string, password: string) => {
+    loading.value = true
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) throw error
+    } catch (error) {
+      console.error(error)
+      const message = translateSupabaseAuthError(error, 'ログインに失敗しました。時間をおいて再度お試しください。')
+      toast.add({
+        title: 'エラー',
+        description: message,
+        color: 'error'
+      })
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const signOut = async () => {
+    await supabase.auth.signOut()
+    await navigateTo('/login')
   }
 
   const redirectIfAuthenticated = () => {
@@ -86,11 +76,9 @@ export const useAuth = () => {
 
   return {
     user,
-    email,
-    password,
-    isSignUp,
     loading,
-    handleAuth,
+    signIn,
+    signUp,
     signOut,
     redirectIfAuthenticated,
     redirectIfUnauthenticated
