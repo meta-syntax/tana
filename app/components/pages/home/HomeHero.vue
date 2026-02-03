@@ -9,8 +9,7 @@
     </UBadge>
     <div class="space-y-4">
       <h1 class="text-4xl font-bold tracking-tight lg:text-6xl">
-        「あとで読む」を、<br class="hidden sm:block">
-        ちゃんと読む。
+        「あとで読む」を、<br>ちゃんと読む。
       </h1>
       <p class="text-lg text-white/70">
         URLを放り込むだけ。タイトルもサムネイルも自動で付くから、あとは読み返すだけ。
