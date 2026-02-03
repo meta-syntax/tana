@@ -6,6 +6,13 @@ definePageMeta({
   layout: 'auth'
 })
 
+useSeoMeta({
+  title: 'ログイン',
+  description: 'Tanaにログインして、保存したブックマークを管理しましょう。',
+  ogTitle: 'ログイン | Tana',
+  ogDescription: 'Tanaにログインして、保存したブックマークを管理しましょう。'
+})
+
 const { signIn, loading, redirectIfAuthenticated } = useAuth()
 
 redirectIfAuthenticated()

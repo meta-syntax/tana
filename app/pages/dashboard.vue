@@ -5,6 +5,11 @@ definePageMeta({
   layout: 'dashboard'
 })
 
+useSeoMeta({
+  title: 'ダッシュボード',
+  robots: 'noindex, nofollow'
+})
+
 const { bookmarks, loading, stats, filterBookmarks, addBookmark, updateBookmark, deleteBookmark } = useBookmarks()
 
 // 検索
