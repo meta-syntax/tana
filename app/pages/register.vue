@@ -6,11 +6,11 @@ definePageMeta({
   layout: 'auth'
 })
 
-const { signIn, loading, redirectIfAuthenticated } = useAuth()
+const { signUp, loading, redirectIfAuthenticated } = useAuth()
 
 redirectIfAuthenticated()
 
-const loginSchema = z.object({
+const registerSchema = z.object({
   email: z
     .email('有効なメールアドレスを入力してください'),
   password: z
@@ -18,36 +18,35 @@ const loginSchema = z.object({
     .min(8, 'パスワードは8文字以上で入力してください')
 })
 
-type LoginSchema = z.output<typeof loginSchema>
+type RegisterSchema = z.output<typeof registerSchema>
 
 const state = reactive({
   email: '',
   password: ''
 })
 
-const onSubmit = async (event: FormSubmitEvent<LoginSchema>) => {
-  await signIn(event.data.email, event.data.password)
+const onSubmit = async (event: FormSubmitEvent<RegisterSchema>) => {
+  await signUp(event.data.email, event.data.password)
 }
 </script>
 
 <template>
   <UContainer class="relative py-16 lg:py-24">
     <div class="grid gap-10 lg:grid-cols-[1fr_420px] lg:items-center">
-      <AuthHero description="保存したURLにタイトルと画像を自動で付けて、探しやすく整理。もう埋もれさせない。">
+      <AuthHero description="無料でアカウントを作成して、ブックマーク管理を始めましょう。">
         <template #headline>
-          ブックマーク、<br class="hidden sm:block">
-          溜めっぱなしにしてない？
+          Tanaを始めよう
         </template>
       </AuthHero>
 
       <AuthFormCard
-        title="ログイン"
-        footer-text="アカウントをお持ちでない方はこちら"
-        footer-link-to="/register"
+        title="新規登録"
+        footer-text="アカウントをお持ちの方はこちら"
+        footer-link-to="/login"
       >
         <template #form>
           <UForm
-            :schema="loginSchema"
+            :schema="registerSchema"
             :state="state"
             class="space-y-4"
             @submit="onSubmit"
@@ -88,7 +87,7 @@ const onSubmit = async (event: FormSubmitEvent<LoginSchema>) => {
               block
               :loading="loading"
             >
-              ログインして続ける
+              新規登録して始める
             </UButton>
           </UForm>
         </template>

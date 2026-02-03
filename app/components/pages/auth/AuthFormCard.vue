@@ -2,14 +2,12 @@
 import type { VNode } from 'vue'
 
 interface Props {
-  isSignUp: boolean
+  title: string
+  footerText: string
+  footerLinkTo: string
 }
 
 const props = defineProps<Props>()
-
-const emit = defineEmits<{
-  toggle: []
-}>()
 
 defineSlots<{
   form(): VNode[]
@@ -21,10 +19,10 @@ defineSlots<{
     <template #header>
       <div class="space-y-2 text-center">
         <p class="text-sm text-gray-500">
-          Tana アカウント
+          Tana
         </p>
         <h2 class="text-3xl font-bold text-[#111]">
-          {{ props.isSignUp ? '新規登録' : 'ログイン' }}
+          {{ props.title }}
         </h2>
       </div>
     </template>
@@ -33,12 +31,12 @@ defineSlots<{
 
     <template #footer>
       <div class="text-center">
-        <UButton
-          variant="ghost"
-          @click="emit('toggle')"
+        <NuxtLink
+          :to="props.footerLinkTo"
+          class="text-sm text-gray-500 underline-offset-4 hover:text-gray-700 hover:underline"
         >
-          {{ props.isSignUp ? 'すでにアカウントをお持ちですか？ログイン' : 'アカウントをお持ちでない方はこちら' }}
-        </UButton>
+          {{ props.footerText }}
+        </NuxtLink>
       </div>
     </template>
   </UCard>

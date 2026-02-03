@@ -12,7 +12,7 @@ const emit = defineEmits<{
           ブックマーク一覧
         </h2>
         <p class="text-sm text-gray-500">
-          保存したURLがここに表示されます
+          保存したブックマーク
         </p>
       </div>
       <UButton
