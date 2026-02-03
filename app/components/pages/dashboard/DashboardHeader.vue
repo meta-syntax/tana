@@ -16,21 +16,13 @@ const emit = defineEmits<{
 <template>
   <header class="relative overflow-hidden bg-(--tana-ink) text-white">
     <div class="absolute inset-0 bg-[radial-gradient(800px_circle_at_10%_20%,rgba(249,115,22,0.18),transparent_60%)]" />
-    <UContainer class="relative py-8">
-      <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-        <div class="space-y-2">
-          <p class="text-xl font-bold tracking-tight text-white/60">
-            <span class="text-(--tana-accent)">T</span>ana
-          </p>
-          <h1 class="text-3xl font-bold lg:text-4xl">
-            ダッシュボード
-          </h1>
-          <p class="text-white/70">
-            あなたのブックマークを管理
-          </p>
-        </div>
-        <div class="flex flex-wrap items-center gap-4">
-          <div class="rounded-full border border-white/15 px-4 py-2 text-sm text-white/70">
+    <UContainer class="relative py-3 sm:py-5">
+      <div class="flex items-center justify-between">
+        <p class="text-xl font-bold tracking-tight text-white/60">
+          <span class="text-(--tana-accent)">T</span>ana
+        </p>
+        <div class="flex items-center gap-4">
+          <div class="hidden rounded-full border border-white/15 px-4 py-2 text-sm text-white/70 sm:block">
             {{ props.userEmail }}
           </div>
           <UButton
