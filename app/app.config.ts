@@ -9,6 +9,11 @@ export default defineAppConfig({
         base: 'w-full bg-white text-[#111] placeholder:text-gray-400 selection:bg-orange-200 selection:text-[#111]'
       },
       variants: {
+        size: {
+          lg: {
+            base: 'px-3 py-2 text-base gap-2'
+          }
+        },
         variant: {
           outline: 'bg-white'
         }
@@ -20,6 +25,11 @@ export default defineAppConfig({
         base: 'w-full bg-white text-[#111] placeholder:text-gray-400 selection:bg-orange-200 selection:text-[#111]'
       },
       variants: {
+        size: {
+          lg: {
+            base: 'px-3 py-2 text-base gap-2'
+          }
+        },
         variant: {
           outline: 'bg-white'
         }
