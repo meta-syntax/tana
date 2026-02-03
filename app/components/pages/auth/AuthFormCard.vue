@@ -18,8 +18,8 @@ defineSlots<{
   <UCard class="border border-white/10 bg-white/95 text-[#111] shadow-2xl">
     <template #header>
       <div class="space-y-2 text-center">
-        <p class="text-sm text-gray-500">
-          Tana
+        <p class="text-xl font-bold tracking-tight text-gray-500">
+          <span class="text-(--tana-accent)">T</span>ana
         </p>
         <h2 class="text-3xl font-bold text-[#111]">
           {{ props.title }}

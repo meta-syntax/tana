@@ -19,8 +19,8 @@ const emit = defineEmits<{
     <UContainer class="relative py-8">
       <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div class="space-y-2">
-          <p class="text-sm text-white/60">
-            Tana
+          <p class="text-xl font-bold tracking-tight text-white/60">
+            <span class="text-(--tana-accent)">T</span>ana
           </p>
           <h1 class="text-3xl font-bold lg:text-4xl">
             ダッシュボード

@@ -13,6 +13,20 @@ const previewItems = [
     domain: 'tailwindcss.com',
     time: '1時間前',
     thumbnail: 'https://tailwindcss.com/opengraph-image.jpg'
+  },
+  {
+    title: 'Vite 6 ビルドツールの進化',
+    description: '次世代フロントエンドツールの最新アップデート',
+    domain: 'vite.dev',
+    time: '3時間前',
+    thumbnail: 'https://vite.dev/og-image.jpg'
+  },
+  {
+    title: 'Supabase で始めるリアルタイムアプリ開発',
+    description: 'PostgreSQLベースのBaaSで高速プロトタイピング',
+    domain: 'supabase.com',
+    time: '昨日',
+    thumbnail: 'https://supabase.com/images/og/supabase-og.png'
   }
 ]
 </script>
