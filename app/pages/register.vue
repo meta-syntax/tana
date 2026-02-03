@@ -6,6 +6,13 @@ definePageMeta({
   layout: 'auth'
 })
 
+useSeoMeta({
+  title: '新規登録',
+  description: 'Tanaに無料登録して、ブックマーク管理を始めましょう。',
+  ogTitle: '新規登録 | Tana',
+  ogDescription: 'Tanaに無料登録して、ブックマーク管理を始めましょう。'
+})
+
 const { signUp, loading, redirectIfAuthenticated } = useAuth()
 
 redirectIfAuthenticated()

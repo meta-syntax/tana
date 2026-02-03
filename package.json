@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "nuxi typecheck",
-    "db:types": "supabase gen types typescript --linked > app/types/database.types.ts"
+    "db:types": "supabase gen types typescript --linked > app/types/database.types.ts",
+    "generate:og": "npx tsx scripts/generate-og-image.ts"
   },
   "dependencies": {
     "@fontsource/zen-kaku-gothic-new": "^5.2.7",
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
+    "sharp": "^0.34.5",
     "supabase": "^2.74.5",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.54.0"

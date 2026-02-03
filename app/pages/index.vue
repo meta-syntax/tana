@@ -2,6 +2,17 @@
 definePageMeta({
   layout: 'marketing'
 })
+
+const runtimeConfig = useRuntimeConfig()
+
+useSeoMeta({
+  title: 'Tana - ブックマークを、いつでも取り出せる資産に。',
+  ogTitle: 'Tana - ブックマークを、いつでも取り出せる資産に。',
+  ogDescription: '個人向けブックマーク管理Webアプリ。URLの保存・編集・削除に加え、OGP自動取得とサムネイル表示で、見返しやすいコレクションを作れます。',
+  ogUrl: runtimeConfig.public.siteUrl
+})
+
+useHead({ titleTemplate: '' })
 </script>
 
 <template>
