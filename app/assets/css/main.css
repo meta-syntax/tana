@@ -4,6 +4,10 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
+body {
+  background-color: var(--tana-ink);
+}
+
 :root {
   font-family: "Zen Kaku Gothic New", "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
   --tana-ink: #0f1117;
@@ -44,4 +48,24 @@
 
 .animate-fade-in {
   animation: fade-in 0.3s ease-out both;
+}
+
+/* Page transition */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.25s ease;
+}
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+}
+
+/* Layout transition */
+.layout-enter-active,
+.layout-leave-active {
+  transition: opacity 0.25s ease;
+}
+.layout-enter-from,
+.layout-leave-to {
+  opacity: 0;
 }

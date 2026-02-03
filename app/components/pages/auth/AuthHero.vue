@@ -14,13 +14,9 @@ defineSlots<{
 
 <template>
   <div class="space-y-6">
-    <UBadge
-      color="primary"
-      variant="soft"
-      class="w-fit bg-[#f97316]/15 text-[#fdba74] ring-1 ring-[#f97316]/35"
-    >
-      Tana
-    </UBadge>
+    <p class="text-xl font-bold tracking-tight text-white/60">
+      <span class="text-(--tana-accent)">T</span>ana
+    </p>
     <h1 class="text-4xl font-bold tracking-tight lg:text-5xl">
       <slot name="headline" />
     </h1>
