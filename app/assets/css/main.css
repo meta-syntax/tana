@@ -8,6 +8,30 @@ body {
   background-color: var(--tana-ink);
 }
 
+/* Scrollbar styling */
+* {
+  scrollbar-color: #c9c5be #f6f4f0;
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--tana-bg, #f6f4f0);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c9c5be;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b0aba3;
+}
+
 :root {
   font-family: "Zen Kaku Gothic New", "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
   --tana-ink: #0f1117;

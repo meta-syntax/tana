@@ -13,8 +13,8 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   app: {
-    pageTransition: { name: 'page', mode: 'out-in' },
-    layoutTransition: { name: 'layout', mode: 'out-in' },
+    pageTransition: { name: 'page', mode: 'out-in', duration: 50 },
+    layoutTransition: { name: 'layout', mode: 'out-in', duration: 50 },
     head: {
       htmlAttrs: { lang: 'ja' },
       link: [

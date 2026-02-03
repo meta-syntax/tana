@@ -240,6 +240,7 @@ const handleSubmit = async () => {
             id="description"
             v-model="formData.description"
             placeholder="メモや説明を追加..."
+            size="lg"
             :rows="3"
           />
         </div>
