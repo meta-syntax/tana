@@ -1,4 +1,4 @@
-import type { Database, Bookmark, BookmarkInput } from '~/types'
+import type { Bookmark, BookmarkInput, Database } from '~/types'
 
 export const useBookmarks = () => {
   const supabase = useSupabaseClient<Database>()
@@ -35,6 +35,19 @@ export const useBookmarks = () => {
   const addBookmark = async (input: BookmarkInput): Promise<boolean> => {
     if (!user.value?.sub) return false
 
+    // 楽観的にローカルへ追加（仮ID）
+    const optimisticBookmark = {
+      id: crypto.randomUUID(),
+      user_id: user.value.sub,
+      url: input.url,
+      title: input.title || null,
+      description: input.description || null,
+      thumbnail_url: input.thumbnail_url || null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    } as Bookmark
+    bookmarks.value = [optimisticBookmark, ...bookmarks.value]
+
     const { error } = await supabase
       .from('bookmarks')
       .insert({
@@ -46,6 +59,8 @@ export const useBookmarks = () => {
       })
 
     if (error) {
+      // ロールバック
+      bookmarks.value = bookmarks.value.filter(b => b.id !== optimisticBookmark.id)
       console.error('Failed to add bookmark:', error)
       toast.add({
         title: 'エラー',
@@ -55,7 +70,7 @@ export const useBookmarks = () => {
       return false
     }
 
-    // キャッシュを再取得
+    // サーバーの正式なIDに同期
     await refreshBookmarks()
 
     toast.add({
@@ -70,6 +85,16 @@ export const useBookmarks = () => {
   const updateBookmark = async (id: string, input: Partial<BookmarkInput>): Promise<boolean> => {
     if (!user.value?.sub) return false
 
+    // スナップショット保存
+    const snapshot = [...bookmarks.value]
+
+    // 楽観的にローカルを更新
+    bookmarks.value = bookmarks.value.map(b =>
+      b.id === id
+        ? { ...b, ...input, updated_at: new Date().toISOString() }
+        : b
+    )
+
     const { error } = await supabase
       .from('bookmarks')
       .update({
@@ -82,6 +107,8 @@ export const useBookmarks = () => {
       .eq('id', id)
 
     if (error) {
+      // ロールバック
+      bookmarks.value = snapshot
       console.error('Failed to update bookmark:', error)
       toast.add({
         title: 'エラー',
@@ -90,9 +117,6 @@ export const useBookmarks = () => {
       })
       return false
     }
-
-    // キャッシュを再取得
-    await refreshBookmarks()
 
     toast.add({
       title: '更新完了',
@@ -106,12 +130,20 @@ export const useBookmarks = () => {
   const deleteBookmark = async (id: string): Promise<boolean> => {
     if (!user.value?.sub) return false
 
+    // スナップショット保存
+    const snapshot = [...bookmarks.value]
+
+    // 楽観的にローカルから削除
+    bookmarks.value = bookmarks.value.filter(b => b.id !== id)
+
     const { error } = await supabase
       .from('bookmarks')
       .delete()
       .eq('id', id)
 
     if (error) {
+      // ロールバック
+      bookmarks.value = snapshot
       console.error('Failed to delete bookmark:', error)
       toast.add({
         title: 'エラー',
@@ -120,9 +152,6 @@ export const useBookmarks = () => {
       })
       return false
     }
-
-    // キャッシュを再取得
-    await refreshBookmarks()
 
     toast.add({
       title: '削除完了',

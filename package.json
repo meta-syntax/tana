@@ -11,8 +11,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "nuxi typecheck",
-    "db:types": "supabase gen types typescript --linked > app/types/database.types.ts",
-    "generate:og": "npx tsx scripts/generate-og-image.ts"
+    "db:types": "supabase gen types typescript --linked > app/types/database.types.ts"
   },
   "dependencies": {
     "@fontsource/zen-kaku-gothic-new": "^5.2.7",

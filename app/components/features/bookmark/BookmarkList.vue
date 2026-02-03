@@ -113,7 +113,7 @@ const displayState = computed(() => {
       v-for="(bookmark, index) in displayedBookmarks"
       :key="bookmark.id"
       :bookmark="bookmark"
-      :style="{ animationDelay: `${index * 50}ms` }"
+      :style="index < 9 ? { animationDelay: `${index * 50}ms` } : undefined"
       class="animate-fade-in"
       @edit="emit('edit', $event)"
       @delete="emit('delete', $event)"

@@ -9,6 +9,16 @@ const scraper = metascraper([
   metascraperImage()
 ])
 
+// インメモリキャッシュ（TTL: 1時間、上限: 500件）
+interface CacheEntry {
+  data: { title: string | null, description: string | null, image: string | null }
+  expiresAt: number
+}
+
+const CACHE_TTL = 60 * 60 * 1000 // 1時間
+const CACHE_MAX_SIZE = 500
+const ogpCache = new Map<string, CacheEntry>()
+
 export default defineEventHandler(async (event) => {
   const body = await readBody<{ url: string }>(event)
 
@@ -28,6 +38,17 @@ export default defineEventHandler(async (event) => {
       statusCode: 400,
       statusMessage: 'Invalid URL format'
     })
+  }
+
+  // キャッシュチェック
+  const cacheKey = targetUrl.toString()
+  const cached = ogpCache.get(cacheKey)
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.data
+  }
+  // 期限切れのエントリを削除
+  if (cached) {
+    ogpCache.delete(cacheKey)
   }
 
   try {
@@ -53,11 +74,20 @@ export default defineEventHandler(async (event) => {
     // metascraperでOGP情報を抽出
     const metadata = await scraper({ html, url: targetUrl.toString() })
 
-    return {
+    const result = {
       title: metadata.title || null,
       description: metadata.description || null,
       image: metadata.image || null
     }
+
+    // キャッシュに保存（上限超過時は最も古いエントリを削除）
+    if (ogpCache.size >= CACHE_MAX_SIZE) {
+      const oldestKey = ogpCache.keys().next().value!
+      ogpCache.delete(oldestKey)
+    }
+    ogpCache.set(cacheKey, { data: result, expiresAt: Date.now() + CACHE_TTL })
+
+    return result
   } catch (error) {
     // タイムアウトエラーの場合
     if (error instanceof Error && error.name === 'TimeoutError') {
