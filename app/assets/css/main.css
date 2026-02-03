@@ -10,8 +10,7 @@ body {
 
 /* Scrollbar styling */
 html {
-  scrollbar-color: #a09890 transparent;
-  scrollbar-width: auto;
+  scrollbar-color: #888078 #f0ede8;
 }
 
 html::-webkit-scrollbar {
@@ -20,16 +19,16 @@ html::-webkit-scrollbar {
 }
 
 html::-webkit-scrollbar-track {
-  background: transparent;
+  background: #f0ede8;
 }
 
 html::-webkit-scrollbar-thumb {
-  background: #a09890;
+  background: #888078;
   border-radius: 4px;
 }
 
 html::-webkit-scrollbar-thumb:hover {
-  background: #8a8078;
+  background: #706860;
 }
 
 :root {
