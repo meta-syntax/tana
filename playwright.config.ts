@@ -19,7 +19,15 @@ export default defineConfig<ConfigOptions>({
   use: {
     nuxt: {
       rootDir: process.cwd(),
-      setupTimeout: 120_000
+      setupTimeout: 120_000,
+      overrides: {
+        nitro: {
+          prerender: {
+            routes: [],
+            crawlLinks: false
+          }
+        }
+      }
     },
     locale: 'ja-JP',
     trace: 'on-first-retry',
