@@ -43,7 +43,7 @@ const handleDelete = () => {
 
 // 動的クラス
 const cardClasses = computed(() => [
-  'group relative overflow-hidden border border-(--tana-border) bg-white transition-all duration-300',
+  'group relative overflow-hidden border border-(--tana-border) bg-default transition-all duration-300',
   props.cardSize === 'large'
     ? 'rounded-xl hover:-translate-y-1 hover:shadow-lg'
     : 'rounded-lg hover:shadow-md'
@@ -61,7 +61,7 @@ const contentClasses = computed(() => ({
 }))
 
 const titleClasses = computed(() => [
-  'font-medium text-(--tana-ink) transition-colors hover:text-(--tana-accent)',
+  'font-medium text-highlighted transition-colors hover:text-(--tana-accent)',
   props.cardSize === 'large' ? 'line-clamp-2' : 'line-clamp-1 text-sm'
 ])
 

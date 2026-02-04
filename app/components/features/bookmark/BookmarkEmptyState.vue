@@ -18,15 +18,15 @@ const isSearchEmpty = computed(() => props.type === 'search')
   <!-- 検索結果が0件 -->
   <div
     v-if="isSearchEmpty"
-    class="rounded-2xl border border-dashed border-(--tana-border) bg-white p-12 text-center"
+    class="rounded-2xl border border-dashed border-(--tana-border) bg-default p-12 text-center"
   >
-    <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-gray-100">
+    <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-muted">
       <UIcon
         name="i-heroicons-magnifying-glass"
         class="size-8 text-gray-400"
       />
     </div>
-    <h3 class="text-lg font-semibold text-(--tana-ink)">
+    <h3 class="text-lg font-semibold text-highlighted">
       検索結果がありません
     </h3>
     <p class="mt-2 text-sm text-gray-500">

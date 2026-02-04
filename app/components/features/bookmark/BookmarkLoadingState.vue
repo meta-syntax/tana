@@ -28,15 +28,15 @@ const skeletonCount = computed(() => skeletonCounts[cardSize.value] ?? 6)
       <div
         v-for="i in skeletonCount"
         :key="i"
-        class="overflow-hidden rounded-xl border border-(--tana-border) bg-white"
+        class="overflow-hidden rounded-xl border border-(--tana-border) bg-default"
       >
-        <div class="aspect-video animate-pulse bg-gray-100" />
+        <div class="aspect-video animate-pulse bg-muted" />
         <div class="space-y-3 p-4">
-          <div class="h-5 w-3/4 animate-pulse rounded bg-gray-100" />
-          <div class="h-4 w-full animate-pulse rounded bg-gray-100" />
+          <div class="h-5 w-3/4 animate-pulse rounded bg-muted" />
+          <div class="h-4 w-full animate-pulse rounded bg-muted" />
           <div class="flex justify-between">
-            <div class="h-3 w-24 animate-pulse rounded bg-gray-100" />
-            <div class="h-3 w-16 animate-pulse rounded bg-gray-100" />
+            <div class="h-3 w-24 animate-pulse rounded bg-muted" />
+            <div class="h-3 w-16 animate-pulse rounded bg-muted" />
           </div>
         </div>
       </div>
@@ -47,14 +47,14 @@ const skeletonCount = computed(() => skeletonCounts[cardSize.value] ?? 6)
       <div
         v-for="i in skeletonCount"
         :key="i"
-        class="overflow-hidden rounded-lg border border-(--tana-border) bg-white"
+        class="overflow-hidden rounded-lg border border-(--tana-border) bg-default"
       >
-        <div class="h-28 animate-pulse bg-gray-100" />
+        <div class="h-28 animate-pulse bg-muted" />
         <div class="space-y-2 p-2.5">
-          <div class="h-4 w-3/4 animate-pulse rounded bg-gray-100" />
+          <div class="h-4 w-3/4 animate-pulse rounded bg-muted" />
           <div class="flex justify-between">
-            <div class="h-3 w-20 animate-pulse rounded bg-gray-100" />
-            <div class="h-3 w-12 animate-pulse rounded bg-gray-100" />
+            <div class="h-3 w-20 animate-pulse rounded bg-muted" />
+            <div class="h-3 w-12 animate-pulse rounded bg-muted" />
           </div>
         </div>
       </div>
@@ -65,11 +65,11 @@ const skeletonCount = computed(() => skeletonCounts[cardSize.value] ?? 6)
       <div
         v-for="i in skeletonCount"
         :key="i"
-        class="overflow-hidden rounded-lg border border-(--tana-border) bg-white"
+        class="overflow-hidden rounded-lg border border-(--tana-border) bg-default"
       >
         <div class="space-y-2 p-2.5">
-          <div class="h-4 w-3/4 animate-pulse rounded bg-gray-100" />
-          <div class="h-3 w-20 animate-pulse rounded bg-gray-100" />
+          <div class="h-4 w-3/4 animate-pulse rounded bg-muted" />
+          <div class="h-3 w-20 animate-pulse rounded bg-muted" />
         </div>
       </div>
     </template>
@@ -79,7 +79,7 @@ const skeletonCount = computed(() => skeletonCounts[cardSize.value] ?? 6)
   <div
     v-else
     data-testid="bookmark-loading"
-    class="rounded-2xl border border-(--tana-border) bg-white p-12"
+    class="rounded-2xl border border-(--tana-border) bg-default p-12"
   >
     <div class="flex flex-col items-center justify-center gap-4">
       <div class="relative">
