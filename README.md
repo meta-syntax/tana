@@ -23,6 +23,8 @@ URLを保存するだけでタイトル・説明・サムネイルを自動取�
 | バックエンド / DB | Supabase (PostgreSQL, Auth, RLS) |
 | OGP取得 | metascraper |
 | バリデーション | Zod |
+| テスト | Vitest / @nuxt/test-utils |
+| CI/CD | GitHub Actions |
 | ユーティリティ | VueUse |
 
 ## ディレクトリ構成
@@ -103,6 +105,8 @@ http://localhost:3000 でアクセスできる。
 | `npm run lint` | ESLint実行 |
 | `npm run lint:fix` | ESLint自動修正 |
 | `npm run typecheck` | TypeScript型チェック |
+| `npm run test` | ユニットテスト実行 |
+| `npm run test:watch` | ユニットテスト（watchモード） |
 | `npm run db:types` | Supabaseの型定義を再生成 |
 
 ## ライセンス

@@ -15,7 +15,7 @@ defineProps<Props>()
     rel="noopener noreferrer"
     class="block"
   >
-    <div class="relative aspect-video overflow-hidden bg-gray-100">
+    <div class="relative aspect-video overflow-hidden bg-muted">
       <img
         v-if="thumbnailUrl"
         :src="thumbnailUrl"
@@ -27,7 +27,7 @@ defineProps<Props>()
       >
       <div
         v-else
-        class="flex h-full w-full items-center justify-center bg-linear-to-br from-gray-50 to-gray-100"
+        class="flex h-full w-full items-center justify-center bg-linear-to-br from-elevated to-muted"
       >
         <UIcon
           name="i-heroicons-link"

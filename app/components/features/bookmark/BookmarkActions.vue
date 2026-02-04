@@ -12,7 +12,7 @@ const emit = defineEmits<{
       size="xs"
       color="neutral"
       variant="solid"
-      class="bg-white/90 shadow-sm backdrop-blur-sm hover:bg-white"
+      class="bg-default/90 shadow-sm backdrop-blur-sm hover:bg-default"
       @click.prevent="emit('edit')"
     />
     <UButton
@@ -20,7 +20,7 @@ const emit = defineEmits<{
       size="xs"
       color="error"
       variant="solid"
-      class="bg-white/90 shadow-sm backdrop-blur-sm hover:bg-red-50"
+      class="bg-default/90 shadow-sm backdrop-blur-sm hover:bg-red-50 dark:hover:bg-red-950"
       @click.prevent="emit('delete')"
     />
   </div>

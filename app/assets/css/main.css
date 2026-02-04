@@ -31,6 +31,22 @@ html::-webkit-scrollbar-thumb:hover {
   background: #706860;
 }
 
+.dark {
+  scrollbar-color: #555 #1a1d26;
+}
+
+.dark::-webkit-scrollbar-track {
+  background: #1a1d26;
+}
+
+.dark::-webkit-scrollbar-thumb {
+  background: #555;
+}
+
+.dark::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
 :root {
   font-family: "Zen Kaku Gothic New", "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
   --tana-ink: #0f1117;
@@ -53,6 +69,38 @@ html::-webkit-scrollbar-thumb:hover {
   --ui-bg-muted: var(--ui-color-neutral-100);
 
   /* Nuxt UI border variables */
+  --ui-border: var(--ui-color-neutral-200);
+  --ui-border-accented: var(--ui-color-neutral-300);
+}
+
+/* Dark mode variables */
+.dark {
+  --tana-bg: #0f1117;
+  --tana-border: #2a2d35;
+  --tana-muted: rgba(255, 255, 255, 0.5);
+
+  --ui-text-highlighted: white;
+  --ui-text: var(--ui-color-neutral-200);
+  --ui-text-muted: var(--ui-color-neutral-400);
+  --ui-text-dimmed: var(--ui-color-neutral-500);
+
+  --ui-bg: #171a22;
+  --ui-bg-elevated: #1e2130;
+  --ui-bg-muted: #1a1d26;
+
+  --ui-border: #2a2d35;
+  --ui-border-accented: #363a45;
+}
+
+/* Force light mode for auth layout (always dark-themed design with light form cards) */
+.dark [data-layout="auth"] {
+  --ui-text-highlighted: var(--tana-ink);
+  --ui-text: var(--ui-color-neutral-700);
+  --ui-text-muted: var(--ui-color-neutral-500);
+  --ui-text-dimmed: var(--ui-color-neutral-400);
+  --ui-bg: white;
+  --ui-bg-elevated: var(--ui-color-neutral-50);
+  --ui-bg-muted: var(--ui-color-neutral-100);
   --ui-border: var(--ui-color-neutral-200);
   --ui-border-accented: var(--ui-color-neutral-300);
 }

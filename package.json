@@ -11,6 +11,10 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "nuxi typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "db:types": "supabase gen types typescript --linked > app/types/database.types.ts"
   },
   "dependencies": {
@@ -32,9 +36,16 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
+    "@nuxt/test-utils": "^3.23.0",
+    "@playwright/test": "^1.58.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/vue": "^8.1.0",
+    "@vue/test-utils": "^2.4.6",
+    "happy-dom": "^20.5.0",
     "sharp": "^0.34.5",
     "supabase": "^2.74.5",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.54.0"
+    "typescript-eslint": "^8.54.0",
+    "vitest": "^3.2.4"
   }
 }

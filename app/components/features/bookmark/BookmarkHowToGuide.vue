@@ -26,8 +26,8 @@ const steps = [
 </script>
 
 <template>
-  <div class="rounded-2xl border border-dashed border-(--tana-border) bg-white p-8 sm:p-12">
-    <h3 class="mb-8 text-center text-lg font-semibold text-(--tana-ink)">
+  <div class="rounded-2xl border border-dashed border-(--tana-border) bg-default p-8 sm:p-12">
+    <h3 class="mb-8 text-center text-lg font-semibold text-highlighted">
       はじめかた
     </h3>
 
@@ -46,7 +46,7 @@ const steps = [
             class="size-5 shrink-0 text-(--tana-accent)"
           />
           <div>
-            <p class="font-medium text-(--tana-ink)">
+            <p class="font-medium text-highlighted">
               {{ step.title }}
             </p>
             <p class="text-sm text-gray-500">

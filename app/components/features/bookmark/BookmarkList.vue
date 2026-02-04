@@ -149,7 +149,7 @@ watch(isPageLoading, (loading) => {
       >
         <div
           v-if="isPageLoading"
-          class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-white/60 backdrop-blur-[1px]"
+          class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-default/60 backdrop-blur-[1px]"
         >
           <UIcon
             name="i-heroicons-arrow-path"
@@ -184,6 +184,7 @@ watch(isPageLoading, (loading) => {
 
     <div
       v-if="totalPages > 1"
+      data-testid="bookmark-pagination"
       class="flex justify-center pt-4"
     >
       <UPagination
