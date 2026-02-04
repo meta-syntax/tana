@@ -2,7 +2,7 @@
 export type { Database, Json, BookmarkRow, BookmarkInsert, BookmarkUpdate } from './database.types'
 
 // Domain types
-export type { Bookmark, BookmarkInput, CardSize, SortField, SortOrder, BookmarkSort } from './bookmark'
+export type { Bookmark, BookmarkInput, CardSize, PerPage, SortField, SortOrder, BookmarkSort } from './bookmark'
 
 // OGP types
 export interface OgpData {

@@ -7,9 +7,14 @@ export const useBookmarks = () => {
 
   // ページネーション・検索・ソート状態
   const page = ref(1)
-  const perPage = ref(12)
+  const { perPage } = usePerPage()
   const searchQuery = ref('')
   const sort = ref<BookmarkSort>({ field: 'created_at', order: 'desc' })
+
+  // perPage変更時にページを1にリセット
+  watch(perPage, () => {
+    page.value = 1
+  })
 
   // ブックマーク取得（サーバーサイドページネーション + 検索 + ソート）
   // totalCountもペイロードに含めるため、itemsとtotalをまとめて返す
@@ -48,7 +53,7 @@ export const useBookmarks = () => {
     },
     {
       default: () => ({ items: [] as Bookmark[], total: 0 }),
-      watch: [user, page, sort]
+      watch: [user, page, perPage, sort]
     }
   )
 
