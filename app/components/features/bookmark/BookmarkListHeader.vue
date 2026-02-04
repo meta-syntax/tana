@@ -18,10 +18,10 @@ const emit = defineEmits<{
 <template>
   <div class="flex flex-wrap items-center justify-between gap-3">
     <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
-      <h2 class="text-xl font-bold text-(--tana-ink)">
+      <h2 class="text-xl font-bold text-highlighted">
         ブックマーク一覧
       </h2>
-      <div class="flex items-center gap-3 text-sm text-gray-500">
+      <div class="flex items-center gap-3 text-sm text-muted">
         <span class="flex items-center gap-1">
           <UIcon
             name="i-heroicons-bookmark"
@@ -29,7 +29,7 @@ const emit = defineEmits<{
           />
           {{ props.stats.total }}件
         </span>
-        <span class="text-gray-300">|</span>
+        <span class="text-dimmed">|</span>
         <span class="flex items-center gap-1">
           <UIcon
             name="i-heroicons-calendar"

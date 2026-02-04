@@ -109,7 +109,7 @@ const descriptionClasses = computed(() => ({
         class="overflow-hidden transition-all duration-300"
         :class="descriptionClasses"
       >
-        <p class="line-clamp-2 text-sm text-gray-500">
+        <p class="line-clamp-2 text-sm text-muted">
           {{ bookmark.description }}
         </p>
       </div>

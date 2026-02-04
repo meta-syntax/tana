@@ -14,7 +14,7 @@ withDefaults(defineProps<Props>(), {
 
 <template>
   <div
-    class="flex items-center text-gray-400 transition-all duration-300"
+    class="flex items-center text-dimmed transition-all duration-300"
     :class="{
       'mt-3 justify-between text-xs': size === 'large',
       'mt-2 justify-between text-[11px]': size === 'medium',
