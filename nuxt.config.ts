@@ -1,4 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+const isTest = process.env.NUXT_TEST === '1'
+
 export default defineNuxtConfig({
 
   modules: ['@nuxt/eslint', '@nuxtjs/supabase', '@nuxt/ui', '@vueuse/nuxt'],
@@ -34,10 +36,12 @@ export default defineNuxtConfig({
 
   nitro: {
     compressPublicAssets: true,
-    prerender: {
-      routes: ['/'],
-      crawlLinks: true
-    },
+    prerender: isTest
+      ? {}
+      : {
+          routes: ['/'],
+          crawlLinks: true
+        },
     routeRules: {
       '/_nuxt/**': {
         headers: {

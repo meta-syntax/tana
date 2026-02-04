@@ -6,6 +6,8 @@ if (existsSync('.env')) {
   process.loadEnvFile('.env')
 }
 
+process.env.NUXT_TEST = '1'
+
 const isCI = !!process.env.CI
 
 export default defineConfig<ConfigOptions>({
@@ -19,15 +21,7 @@ export default defineConfig<ConfigOptions>({
   use: {
     nuxt: {
       rootDir: process.cwd(),
-      setupTimeout: 120_000,
-      overrides: {
-        nitro: {
-          prerender: {
-            routes: [],
-            crawlLinks: false
-          }
-        }
-      }
+      setupTimeout: 120_000
     },
     locale: 'ja-JP',
     trace: 'on-first-retry',
