@@ -184,6 +184,7 @@ watch(isPageLoading, (loading) => {
 
     <div
       v-if="totalPages > 1"
+      data-testid="bookmark-pagination"
       class="flex justify-center pt-4"
     >
       <UPagination

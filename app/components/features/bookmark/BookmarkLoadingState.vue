@@ -20,6 +20,7 @@ const skeletonCount = computed(() => skeletonCounts[cardSize.value] ?? 6)
   <!-- 初回ローディング（スケルトン） -->
   <div
     v-if="type === 'initial'"
+    data-testid="bookmark-loading"
     :class="gridClass"
   >
     <!-- Large -->
@@ -77,6 +78,7 @@ const skeletonCount = computed(() => skeletonCounts[cardSize.value] ?? 6)
   <!-- 検索中のローディング -->
   <div
     v-else
+    data-testid="bookmark-loading"
     class="rounded-2xl border border-(--tana-border) bg-white p-12"
   >
     <div class="flex flex-col items-center justify-center gap-4">

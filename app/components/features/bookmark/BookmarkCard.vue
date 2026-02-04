@@ -72,8 +72,12 @@ const descriptionClasses = computed(() => ({
 </script>
 
 <template>
-  <div :class="cardClasses">
+  <div
+    data-testid="bookmark-card"
+    :class="cardClasses"
+  >
     <div
+      data-testid="bookmark-thumbnail"
       class="overflow-hidden transition-all duration-300"
       :class="thumbnailWrapperClasses"
     >
@@ -101,6 +105,7 @@ const descriptionClasses = computed(() => ({
 
       <div
         v-if="bookmark.description"
+        data-testid="bookmark-description"
         class="overflow-hidden transition-all duration-300"
         :class="descriptionClasses"
       >

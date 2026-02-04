@@ -8,6 +8,7 @@ export default defineVitestConfig({
         domEnvironment: 'happy-dom'
       }
     },
+    setupFiles: ['./vitest.setup.ts'],
     include: ['app/**/*.test.ts', 'server/**/*.test.ts']
   }
 })
