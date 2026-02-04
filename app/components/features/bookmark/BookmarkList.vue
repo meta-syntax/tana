@@ -81,6 +81,9 @@ const isPageLoading = computed(() =>
   props.loading && displayedBookmarks.value.length > 0
 )
 
+// カードサイズ
+const { cardSize, gridClass } = useCardSize()
+
 // ページ/ソート切り替え時はTransitionGroupアニメーションをスキップ
 const skipTransition = ref(false)
 
@@ -157,8 +160,7 @@ watch(isPageLoading, (loading) => {
 
       <TransitionGroup
         tag="div"
-        class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-        :class="{ 'pointer-events-none': isPageLoading }"
+        :class="[gridClass, { 'pointer-events-none': isPageLoading }]"
         :enter-active-class="skipTransition ? '' : 'transition-all duration-300 ease-out'"
         :enter-from-class="skipTransition ? '' : 'opacity-0 scale-95'"
         :enter-to-class="skipTransition ? '' : 'opacity-100 scale-100'"
@@ -171,6 +173,7 @@ watch(isPageLoading, (loading) => {
           v-for="(bookmark, index) in displayedBookmarks"
           :key="bookmark.id"
           :bookmark="bookmark"
+          :card-size="cardSize"
           :style="index < 9 ? { animationDelay: `${index * 50}ms` } : undefined"
           class="animate-fade-in"
           @edit="emit('edit', $event)"

@@ -57,13 +57,17 @@ const sortValue = computed({
         </template>
       </UInput>
 
-      <USelect
-        v-model="sortValue"
-        :items="sortOptions"
-        size="lg"
-        class="w-full sm:w-44"
-        icon="i-heroicons-arrows-up-down"
-      />
+      <div class="flex gap-2">
+        <USelect
+          v-model="sortValue"
+          :items="sortOptions"
+          size="lg"
+          class="w-full sm:w-44"
+          icon="i-heroicons-arrows-up-down"
+        />
+
+        <BookmarkSizeSwitcher />
+      </div>
     </div>
 
     <Transition

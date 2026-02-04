@@ -11,6 +11,9 @@ export interface BookmarkInput {
   thumbnail_url?: string | null
 }
 
+/** カードサイズ */
+export type CardSize = 'large' | 'medium' | 'small'
+
 /** ソート対象フィールド */
 export type SortField = 'created_at' | 'title' | 'url'
 
