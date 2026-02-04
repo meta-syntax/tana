@@ -11,7 +11,7 @@ const emit = defineEmits<{
       icon="i-heroicons-pencil-square"
       size="xs"
       color="neutral"
-      variant="solid"
+      variant="ghost"
       class="bg-default/90 shadow-sm backdrop-blur-sm hover:bg-default"
       @click.prevent="emit('edit')"
     />
@@ -19,7 +19,7 @@ const emit = defineEmits<{
       icon="i-heroicons-trash"
       size="xs"
       color="error"
-      variant="solid"
+      variant="ghost"
       class="bg-default/90 shadow-sm backdrop-blur-sm hover:bg-red-50 dark:hover:bg-red-950"
       @click.prevent="emit('delete')"
     />
