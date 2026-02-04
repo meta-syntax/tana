@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { SelectItem } from '@nuxt/ui'
-import type { BookmarkSort } from '~/types'
+import type { BookmarkSort, PerPage } from '~/types'
 
 interface Props {
   isSearching: boolean
@@ -30,6 +30,20 @@ const sortValue = computed({
     emit('update:sort', { field, order })
   }
 })
+
+// パーページ
+const { perPage, setPerPage } = usePerPage()
+
+const perPageOptions: SelectItem[] = [
+  { label: '12件', value: 12 },
+  { label: '24件', value: 24 },
+  { label: '48件', value: 48 }
+]
+
+const perPageValue = computed({
+  get: () => perPage.value,
+  set: (val: number) => setPerPage(val as PerPage)
+})
 </script>
 
 <template>
@@ -57,13 +71,24 @@ const sortValue = computed({
         </template>
       </UInput>
 
-      <USelect
-        v-model="sortValue"
-        :items="sortOptions"
-        size="lg"
-        class="w-full sm:w-44"
-        icon="i-heroicons-arrows-up-down"
-      />
+      <div class="flex gap-2">
+        <USelect
+          v-model="sortValue"
+          :items="sortOptions"
+          size="lg"
+          class="w-full sm:w-44"
+          icon="i-heroicons-arrows-up-down"
+        />
+
+        <USelect
+          v-model="perPageValue"
+          :items="perPageOptions"
+          size="lg"
+          class="w-24"
+        />
+
+        <BookmarkSizeSwitcher />
+      </div>
     </div>
 
     <Transition

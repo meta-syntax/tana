@@ -11,6 +11,12 @@ export interface BookmarkInput {
   thumbnail_url?: string | null
 }
 
+/** カードサイズ */
+export type CardSize = 'large' | 'medium' | 'small'
+
+/** 1ページあたりの表示件数 */
+export type PerPage = 12 | 24 | 48
+
 /** ソート対象フィールド */
 export type SortField = 'created_at' | 'title' | 'url'
 
