@@ -38,15 +38,8 @@ const onSubmit = async (event: FormSubmitEvent<LoginSchema>) => {
 </script>
 
 <template>
-  <UContainer class="relative py-16 lg:py-24">
-    <div class="grid gap-10 lg:grid-cols-[1fr_420px] lg:items-center">
-      <AuthHero description="保存したURLにタイトルと画像を自動で付けて、探しやすく整理。もう埋もれさせない。">
-        <template #headline>
-          ブックマーク、<br class="hidden sm:block">
-          溜めっぱなしにしてない？
-        </template>
-      </AuthHero>
-
+  <UContainer class="relative flex min-h-[80vh] items-center justify-center py-16 lg:py-24">
+    <div class="w-full max-w-[420px]">
       <AuthFormCard
         title="ログイン"
         footer-text="アカウントをお持ちでない方はこちら"
