@@ -23,5 +23,11 @@ useHead({ titleTemplate: '' })
       <HomeHero />
       <HomePreviewPanel />
     </div>
+
+    <div class="mt-24 space-y-24 lg:mt-32 lg:space-y-32">
+      <HomePainPoints />
+      <HomeSolution />
+      <HomeCta />
+    </div>
   </UContainer>
 </template>

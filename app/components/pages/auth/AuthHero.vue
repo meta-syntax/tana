@@ -14,9 +14,12 @@ defineSlots<{
 
 <template>
   <div class="space-y-6">
-    <p class="text-xl font-bold tracking-tight text-white/60">
+    <NuxtLink
+      to="/"
+      class="text-xl font-bold tracking-tight text-white/60 hover:text-white/80"
+    >
       <span class="text-(--tana-accent)">T</span>ana
-    </p>
+    </NuxtLink>
     <h1 class="text-4xl font-bold tracking-tight lg:text-5xl">
       <slot name="headline" />
     </h1>
