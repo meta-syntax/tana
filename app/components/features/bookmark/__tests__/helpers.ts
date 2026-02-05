@@ -2,7 +2,7 @@ import type { Bookmark, BookmarkSort } from '~/types'
 
 let idCounter = 0
 
-export function createMockBookmark(overrides?: Partial<Bookmark>): Bookmark {
+export const createMockBookmark = (overrides?: Partial<Bookmark>): Bookmark => {
   idCounter++
   return {
     id: `bookmark-${idCounter}`,
@@ -17,7 +17,7 @@ export function createMockBookmark(overrides?: Partial<Bookmark>): Bookmark {
   }
 }
 
-export function createMockBookmarks(count: number, overrides?: Partial<Bookmark>): Bookmark[] {
+export const createMockBookmarks = (count: number, overrides?: Partial<Bookmark>): Bookmark[] => {
   return Array.from({ length: count }, () => createMockBookmark(overrides))
 }
 
@@ -25,6 +25,6 @@ export const defaultStats = { total: 10, thisWeek: 3 }
 
 export const defaultSort: BookmarkSort = { field: 'created_at', order: 'desc' }
 
-export function resetIdCounter() {
+export const resetIdCounter = (): void => {
   idCounter = 0
 }

@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Bookmark, BookmarkSort, Database } from '~/types'
+import type { Bookmark, BookmarkSort, BookmarkWithJoinedTags, Database, Tag } from '~/types'
 
 interface UseBookmarkQueryOptions {
   supabase: SupabaseClient<Database>
@@ -12,18 +12,17 @@ interface UseBookmarkQueryOptions {
 }
 
 /** JOINレスポンスからtagsをフラット化してBookmark型に変換 */
-function flattenBookmarkTags(rows: Record<string, unknown>[]): Bookmark[] {
+const flattenBookmarkTags = (rows: BookmarkWithJoinedTags[]): Bookmark[] => {
   return rows.map((row) => {
-    const bookmarkTags = row.bookmark_tags as Array<{ tags: Record<string, unknown> }> | undefined
-    const tags = (bookmarkTags ?? [])
+    const tags = (row.bookmark_tags ?? [])
       .map(bt => bt.tags)
-      .filter(Boolean)
+      .filter((t): t is Tag => t !== null)
     const { bookmark_tags: _, ...rest } = row
     return { ...rest, tags }
-  }) as unknown as Bookmark[]
+  })
 }
 
-export function useBookmarkQuery(options: UseBookmarkQueryOptions) {
+export const useBookmarkQuery = (options: UseBookmarkQueryOptions) => {
   const { supabase, user, page, perPage, searchQuery, sort, selectedTagIds } = options
 
   const { data: bookmarkData, status, refresh: refreshBookmarks } = useLazyAsyncData(
@@ -81,7 +80,7 @@ export function useBookmarkQuery(options: UseBookmarkQueryOptions) {
         throw error
       }
 
-      const items = flattenBookmarkTags((data ?? []) as unknown as Record<string, unknown>[])
+      const items = flattenBookmarkTags((data ?? []) as BookmarkWithJoinedTags[])
 
       return { items, total: count ?? 0 }
     },

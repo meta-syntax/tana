@@ -2,10 +2,10 @@
 export type { Database, Json, BookmarkRow, BookmarkInsert, BookmarkUpdate, TagRow, TagInsert, TagUpdate, BookmarkTagRow } from './database.types'
 
 // Domain types
-export type { Bookmark, BookmarkInput, CardSize, PerPage, SortField, SortOrder, BookmarkSort } from './bookmark'
+export type { Bookmark, BookmarkInput, BookmarkWithJoinedTags, CardSize, PerPage, SortField, SortOrder, BookmarkSort } from './bookmark'
 
 // Tag types
-export type { Tag, TagInput, TagWithCount } from './tag'
+export type { Tag, TagInput, TagRowWithCountJoin, TagWithCount } from './tag'
 
 // OGP types
 export interface OgpData {

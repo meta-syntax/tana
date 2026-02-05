@@ -10,7 +10,7 @@ interface UseBookmarkMutationsOptions {
   refreshStats: () => Promise<void>
 }
 
-export function useBookmarkMutations(options: UseBookmarkMutationsOptions) {
+export const useBookmarkMutations = (options: UseBookmarkMutationsOptions) => {
   const { supabase, user, bookmarks, page, refreshBookmarks, refreshStats } = options
   const toast = useToast()
 

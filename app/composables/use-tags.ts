@@ -1,4 +1,4 @@
-import type { Database, Tag, TagInput, TagWithCount } from '~/types'
+import type { Database, Tag, TagInput, TagRowWithCountJoin, TagWithCount } from '~/types'
 
 export const useTags = () => {
   const supabase = useSupabaseClient<Database>()
@@ -22,10 +22,11 @@ export const useTags = () => {
         return [] as TagWithCount[]
       }
 
-      return (data ?? []).map(tag => ({
-        ...tag,
-        bookmark_count: (tag.bookmark_tags as unknown as { count: number }[])?.[0]?.count ?? 0
-      })) as TagWithCount[]
+      const rows = (data ?? []) as TagRowWithCountJoin[]
+      return rows.map((tag): TagWithCount => {
+        const { bookmark_tags, ...rest } = tag
+        return { ...rest, bookmark_count: bookmark_tags?.[0]?.count ?? 0 }
+      })
     },
     {
       default: () => [] as TagWithCount[],

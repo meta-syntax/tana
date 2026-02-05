@@ -16,7 +16,7 @@ mockNuxtImport('useOgp', () => {
 })
 
 // DOMヘルパー: Teleport先のコンテンツを検索
-function findInBody(selector: string): HTMLElement | null {
+const findInBody = (selector: string): HTMLElement | null => {
   return document.body.querySelector(selector)
 }
 

@@ -4,6 +4,10 @@
 
 URLを保存するだけでタイトル・説明・サムネイルを自動取得する、個人向けブックマーク管理アプリ。
 
+**URL:** https://tana.meta-syntax.biz/
+
+Vercelで自動デプロイ（`develop`ブランチへのpushで自動反映）
+
 ## 主な機能
 
 - **OGP自動取得** - URLを入力するだけでタイトル・説明・画像を自動で取得
@@ -15,17 +19,35 @@ URLを保存するだけでタイトル・説明・サムネイルを自動取�
 
 ## 技術スタック
 
-| カテゴリ | 技術 |
-|---------|------|
-| フレームワーク | Nuxt 4 / Vue 3 |
-| 言語 | TypeScript |
-| UI | Nuxt UI / Tailwind CSS 4 |
-| バックエンド / DB | Supabase (PostgreSQL, Auth, RLS) |
-| OGP取得 | metascraper |
-| バリデーション | Zod |
-| テスト | Vitest / @nuxt/test-utils |
-| CI/CD | GitHub Actions |
-| ユーティリティ | VueUse |
+| カテゴリ        | 技術                                     |
+|-------------|----------------------------------------|
+| フレームワーク     | Nuxt 4 / Vue 3                         |
+| 言語          | TypeScript                             |
+| UI          | Nuxt UI / Tailwind CSS 4               |
+| バックエンド / DB | Supabase (PostgreSQL, Auth, RLS)       |
+| OGP取得       | metascraper                            |
+| バリデーション     | Zod                                    |
+| テスト         | Vitest / @nuxt/test-utils / Playwright |
+| CI/CD       | GitHub Actions                         |
+| デプロイ        | Vercel                                 |
+| ユーティリティ     | VueUse                                 |
+
+## 技術的な意思決定
+
+### Nuxt 4の採用
+
+Nuxt 4は2025年にリリースされた最新メジャーバージョン。新しいディレクトリ構造（`app/`
+ディレクトリ）や互換性の変更点など、最新のエコシステムをキャッチアップする目的で採用。
+
+### Composablesの責務分離
+
+ブックマーク操作のcomposablesは、CQRS（Command Query Responsibility Segregation）の考え方を参考に設計した。
+
+- **`use-bookmark-query.ts`** - データの読み取り（検索・ページネーション・ソート）
+- **`use-bookmark-mutations.ts`** - データの書き込み（追加・更新・削除 + 楽観的UI）
+- **`use-bookmarks.ts`** - 上記を統合するファサード
+
+読み取りと書き込みでは要件が異なる（読み取りはリアクティブな依存関係の管理、書き込みは楽観的更新とロールバック）ため、分離することで各composableの責務を明確にし、テスタビリティを高めている。
 
 ## ディレクトリ構成
 
@@ -35,7 +57,8 @@ app/
 ├── components/
 │   ├── common/          # 共通コンポーネント
 │   ├── features/
-│   │   └── bookmark/    # ブックマーク関連コンポーネント
+│   │   ├── bookmark/    # ブックマーク関連コンポーネント
+│   │   └── tag/         # タグ関連コンポーネント
 │   └── pages/           # ページ固有コンポーネント
 │       ├── auth/
 │       ├── dashboard/
@@ -97,17 +120,17 @@ http://localhost:3000 でアクセスできる。
 
 ## スクリプト
 
-| コマンド | 説明 |
-|---------|------|
-| `npm run dev` | 開発サーバー起動 |
-| `npm run build` | プロダクションビルド |
-| `npm run preview` | ビルドのプレビュー |
-| `npm run lint` | ESLint実行 |
-| `npm run lint:fix` | ESLint自動修正 |
-| `npm run typecheck` | TypeScript型チェック |
-| `npm run test` | ユニットテスト実行 |
+| コマンド                 | 説明                |
+|----------------------|-------------------|
+| `npm run dev`        | 開発サーバー起動          |
+| `npm run build`      | プロダクションビルド        |
+| `npm run preview`    | ビルドのプレビュー         |
+| `npm run lint`       | ESLint実行          |
+| `npm run lint:fix`   | ESLint自動修正        |
+| `npm run typecheck`  | TypeScript型チェック   |
+| `npm run test`       | ユニットテスト実行         |
 | `npm run test:watch` | ユニットテスト（watchモード） |
-| `npm run db:types` | Supabaseの型定義を再生成 |
+| `npm run db:types`   | Supabaseの型定義を再生成  |
 
 ## ライセンス
 
