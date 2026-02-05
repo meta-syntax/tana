@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { Bookmark, TagInput } from '~/types'
+import type { Bookmark, TagInput, RssFeed } from '~/types'
+import type { TabsItem } from '@nuxt/ui'
 
 definePageMeta({
   layout: 'dashboard',
@@ -25,6 +26,29 @@ const {
   addTag, updateTag, deleteTag,
   syncBookmarkTags
 } = useTags()
+
+const {
+  feeds, feedsLoading,
+  addFeed, deleteFeed, syncFeed, toggleFeedActive
+} = useFeeds()
+
+// タブ管理
+const activeTab = ref('bookmarks')
+
+const tabItems: TabsItem[] = [
+  {
+    label: 'ブックマーク',
+    icon: 'i-heroicons-bookmark',
+    value: 'bookmarks',
+    slot: 'bookmarks'
+  },
+  {
+    label: 'RSSフィード',
+    icon: 'i-heroicons-rss',
+    value: 'feeds',
+    slot: 'feeds'
+  }
+]
 
 // 検索（debounce付き）
 const searchQuery = ref('')
@@ -69,10 +93,6 @@ const handleDelete = async (bookmark: Bookmark) => {
 // タグ管理モーダル
 const isTagManageModalOpen = ref(false)
 
-const handleAddTag = async (input: TagInput) => {
-  await addTag(input)
-}
-
 const handleUpdateTag = async (id: string, input: TagInput) => {
   await updateTag(id, input)
   await refreshBookmarks()
@@ -83,33 +103,92 @@ const handleDeleteTag = async (id: string) => {
   selectedTagIds.value = selectedTagIds.value.filter(tagId => tagId !== id)
   await refreshBookmarks()
 }
+
+// フィード管理
+const isFeedAddModalOpen = ref(false)
+const isFeedDeleteModalOpen = ref(false)
+const deletingFeed = ref<RssFeed | null>(null)
+
+const handleAddFeed = async (url: string) => {
+  const result = await addFeed({ url })
+  if (result) {
+    isFeedAddModalOpen.value = false
+  }
+}
+
+const handleSyncFeed = async (feed: RssFeed) => {
+  const success = await syncFeed(feed.id)
+  if (success) {
+    await refreshBookmarks()
+  }
+}
+
+const handleConfirmDeleteFeed = (feed: RssFeed) => {
+  deletingFeed.value = feed
+  isFeedDeleteModalOpen.value = true
+}
+
+const handleDeleteFeed = async () => {
+  if (!deletingFeed.value) return
+  const success = await deleteFeed(deletingFeed.value.id)
+  if (success) {
+    isFeedDeleteModalOpen.value = false
+    deletingFeed.value = null
+  }
+}
+
+const handleToggleFeedActive = (feed: RssFeed) => {
+  toggleFeedActive(feed)
+}
 </script>
 
 <template>
   <main class="py-4 sm:py-8">
     <UContainer class="space-y-6">
-      <BookmarkList
-        v-model:search-query="searchQuery"
-        v-model:selected-tag-ids="selectedTagIds"
-        :bookmarks="bookmarks"
-        :loading="loading"
-        :total-count="totalCount"
-        :page="page"
-        :per-page="perPage"
-        :sort="sort"
-        :stats="stats"
-        :tags="tags ?? []"
-        :is-drag-enabled="isDragEnabled"
-        :is-reordering="isReordering"
-        @add="openAddModal"
-        @edit="openEditModal"
-        @delete="handleDelete"
-        @update:page="changePage"
-        @update:sort="changeSort"
-        @update:selected-tag-ids="filterByTags"
-        @manage-tags="isTagManageModalOpen = true"
-        @reorder="handleReorder"
-      />
+      <UTabs
+        v-model="activeTab"
+        :items="tabItems"
+      >
+        <template #bookmarks>
+          <div class="space-y-6 pt-6">
+            <BookmarkList
+              v-model:search-query="searchQuery"
+              v-model:selected-tag-ids="selectedTagIds"
+              :bookmarks="bookmarks"
+              :loading="loading"
+              :total-count="totalCount"
+              :page="page"
+              :per-page="perPage"
+              :sort="sort"
+              :stats="stats"
+              :tags="tags ?? []"
+              :is-drag-enabled="isDragEnabled"
+              :is-reordering="isReordering"
+              @add="openAddModal"
+              @edit="openEditModal"
+              @delete="handleDelete"
+              @update:page="changePage"
+              @update:sort="changeSort"
+              @update:selected-tag-ids="filterByTags"
+              @manage-tags="isTagManageModalOpen = true"
+              @reorder="handleReorder"
+            />
+          </div>
+        </template>
+
+        <template #feeds>
+          <div class="space-y-6 pt-6">
+            <FeedList
+              :feeds="feeds ?? []"
+              :loading="feedsLoading"
+              @add="isFeedAddModalOpen = true"
+              @sync="handleSyncFeed"
+              @delete="handleConfirmDeleteFeed"
+              @toggle-active="handleToggleFeedActive"
+            />
+          </div>
+        </template>
+      </UTabs>
     </UContainer>
 
     <BookmarkModal
@@ -123,9 +202,20 @@ const handleDeleteTag = async (id: string) => {
     <TagManageModal
       v-model:open="isTagManageModalOpen"
       :tags="tags ?? []"
-      @add="handleAddTag"
+      @add="addTag"
       @update="handleUpdateTag"
       @delete="handleDeleteTag"
+    />
+
+    <FeedAddModal
+      v-model:open="isFeedAddModalOpen"
+      @add="handleAddFeed"
+    />
+
+    <FeedDeleteModal
+      v-model:open="isFeedDeleteModalOpen"
+      :title="deletingFeed?.title || deletingFeed?.url || ''"
+      @confirm="handleDeleteFeed"
     />
   </main>
 </template>

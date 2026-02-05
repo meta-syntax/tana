@@ -11,6 +11,7 @@ export const createMockBookmark = (overrides?: Partial<Bookmark>): Bookmark => {
     title: `テストブックマーク ${idCounter}`,
     description: `テスト説明文 ${idCounter}`,
     thumbnail_url: `https://example-${idCounter}.com/og.png`,
+    rss_feed_id: null,
     sort_order: idCounter * 1000,
     created_at: '2025-01-01T00:00:00Z',
     updated_at: '2025-01-01T00:00:00Z',
