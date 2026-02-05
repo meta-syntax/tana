@@ -1,16 +1,19 @@
 <script setup lang="ts">
-import type { Bookmark, BookmarkInput } from '~/types'
+import type { Bookmark, BookmarkInput, Tag } from '~/types'
 
 interface Props {
   bookmark?: Bookmark | null
+  tags?: Tag[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  bookmark: null
+  bookmark: null,
+  tags: () => []
 })
 
 const emit = defineEmits<{
-  save: [data: BookmarkInput]
+  'save': [data: BookmarkInput]
+  'create-tag': [input: { name: string, color: string }]
 }>()
 
 const isOpen = defineModel<boolean>('open', { required: true })
@@ -31,7 +34,8 @@ const formData = ref<BookmarkInput>({
   url: '',
   title: '',
   description: '',
-  thumbnail_url: null
+  thumbnail_url: null,
+  tag_ids: []
 })
 
 // バリデーションエラー
@@ -48,7 +52,8 @@ watch(isOpen, (open) => {
         url: props.bookmark.url,
         title: props.bookmark.title || '',
         description: props.bookmark.description || '',
-        thumbnail_url: props.bookmark.thumbnail_url || null
+        thumbnail_url: props.bookmark.thumbnail_url || null,
+        tag_ids: (props.bookmark.tags ?? []).map(t => t.id)
       }
       lastFetchedUrl.value = props.bookmark.url
     } else {
@@ -56,7 +61,8 @@ watch(isOpen, (open) => {
         url: '',
         title: '',
         description: '',
-        thumbnail_url: null
+        thumbnail_url: null,
+        tag_ids: []
       }
       lastFetchedUrl.value = null
     }
@@ -138,7 +144,8 @@ const handleSubmit = async () => {
     url: formData.value.url,
     title: formData.value.title || null,
     description: formData.value.description || null,
-    thumbnail_url: formData.value.thumbnail_url || null
+    thumbnail_url: formData.value.thumbnail_url || null,
+    tag_ids: formData.value.tag_ids ?? []
   })
 
   // loadingのリセットは親コンポーネントがモーダルを閉じたときに行われる
@@ -244,6 +251,14 @@ const handleSubmit = async () => {
             :rows="3"
           />
         </div>
+
+        <!-- Tags -->
+        <TagSelect
+          :model-value="formData.tag_ids ?? []"
+          :tags="props.tags"
+          @update:model-value="formData.tag_ids = $event"
+          @create-tag="emit('create-tag', $event)"
+        />
 
         <!-- アクションボタン -->
         <div class="flex justify-end gap-3 pt-2">

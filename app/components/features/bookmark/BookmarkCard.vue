@@ -104,6 +104,18 @@ const descriptionClasses = computed(() => ({
       </a>
 
       <div
+        v-if="bookmark.tags && bookmark.tags.length > 0 && cardSize !== 'small'"
+        class="mt-1.5 flex flex-wrap gap-1"
+      >
+        <TagBadge
+          v-for="tag in bookmark.tags"
+          :key="tag.id"
+          :name="tag.name"
+          :color="tag.color"
+        />
+      </div>
+
+      <div
         v-if="bookmark.description"
         data-testid="bookmark-description"
         class="overflow-hidden transition-all duration-300"

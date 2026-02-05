@@ -39,6 +39,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookmark_tags: {
+        Row: {
+          bookmark_id: string
+          created_at: string | null
+          id: string
+          tag_id: string
+        }
+        Insert: {
+          bookmark_id: string
+          created_at?: string | null
+          id?: string
+          tag_id: string
+        }
+        Update: {
+          bookmark_id?: string
+          created_at?: string | null
+          id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'bookmark_tags_bookmark_id_fkey'
+            columns: ['bookmark_id']
+            isOneToOne: false
+            referencedRelation: 'bookmarks'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'bookmark_tags_tag_id_fkey'
+            columns: ['tag_id']
+            isOneToOne: false
+            referencedRelation: 'tags'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       bookmarks: {
         Row: {
           created_at: string | null
@@ -72,6 +108,33 @@ export type Database = {
         }
         Relationships: []
       }
+      tags: {
+        Row: {
+          color: string
+          created_at: string | null
+          id: string
+          name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -93,8 +156,7 @@ type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>
 type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, 'public'>]
 
 export type Tables<
-  DefaultSchemaTableNameOrOptions extends
-  | keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
+  DefaultSchemaTableNameOrOptions extends | keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
   | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
@@ -122,8 +184,7 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends
-  | keyof DefaultSchema['Tables']
+  DefaultSchemaTableNameOrOptions extends | keyof DefaultSchema['Tables']
   | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
@@ -147,8 +208,7 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends
-  | keyof DefaultSchema['Tables']
+  DefaultSchemaTableNameOrOptions extends | keyof DefaultSchema['Tables']
   | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
@@ -172,8 +232,7 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  DefaultSchemaEnumNameOrOptions extends
-  | keyof DefaultSchema['Enums']
+  DefaultSchemaEnumNameOrOptions extends | keyof DefaultSchema['Enums']
   | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
@@ -189,8 +248,7 @@ export type Enums<
     : never
 
 export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends
-  | keyof DefaultSchema['CompositeTypes']
+  PublicCompositeTypeNameOrOptions extends | keyof DefaultSchema['CompositeTypes']
   | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
@@ -218,3 +276,11 @@ export const Constants = {
 export type BookmarkRow = Database['public']['Tables']['bookmarks']['Row']
 export type BookmarkInsert = Database['public']['Tables']['bookmarks']['Insert']
 export type BookmarkUpdate = Database['public']['Tables']['bookmarks']['Update']
+
+// Tag type aliases for convenience
+export type TagRow = Database['public']['Tables']['tags']['Row']
+export type TagInsert = Database['public']['Tables']['tags']['Insert']
+export type TagUpdate = Database['public']['Tables']['tags']['Update']
+
+// BookmarkTag type aliases for convenience
+export type BookmarkTagRow = Database['public']['Tables']['bookmark_tags']['Row']

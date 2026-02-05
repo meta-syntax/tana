@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Bookmark, BookmarkSort } from '~/types'
+import type { Bookmark, BookmarkSort, TagWithCount } from '~/types'
 
 interface Stats {
   total: number
@@ -14,11 +14,15 @@ interface Props {
   perPage: number
   sort: BookmarkSort
   stats: Stats
+  tags?: TagWithCount[]
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  tags: () => []
+})
 
 const searchQuery = defineModel<string>('searchQuery', { default: '' })
+const selectedTagIds = defineModel<string[]>('selectedTagIds', { default: () => [] })
 
 const emit = defineEmits<{
   'add': []
@@ -26,6 +30,7 @@ const emit = defineEmits<{
   'delete': [bookmark: Bookmark]
   'update:page': [page: number]
   'update:sort': [sort: BookmarkSort]
+  'manage-tags': []
 }>()
 
 // 検索状態の管理
@@ -104,6 +109,7 @@ watch(isPageLoading, (loading) => {
   <BookmarkListHeader
     :stats="props.stats"
     @add="emit('add')"
+    @manage-tags="emit('manage-tags')"
   />
 
   <BookmarkSearchBar
@@ -112,6 +118,12 @@ watch(isPageLoading, (loading) => {
     :search-result-text="searchResultText"
     :sort="props.sort"
     @update:sort="emit('update:sort', $event)"
+  />
+
+  <TagFilter
+    v-if="props.tags.length > 0"
+    v-model="selectedTagIds"
+    :tags="props.tags"
   />
 
   <BookmarkLoadingState

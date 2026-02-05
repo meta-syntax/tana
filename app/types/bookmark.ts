@@ -1,7 +1,10 @@
 import type { BookmarkRow } from './database.types'
+import type { Tag } from './tag'
 
 /** ブックマーク型（DBから取得した完全なデータ） */
-export type Bookmark = BookmarkRow
+export type Bookmark = BookmarkRow & {
+  tags?: Tag[]
+}
 
 /** ブックマーク作成/更新時のフォーム入力型 */
 export interface BookmarkInput {
@@ -9,6 +12,7 @@ export interface BookmarkInput {
   title?: string | null
   description?: string | null
   thumbnail_url?: string | null
+  tag_ids?: string[]
 }
 
 /** カードサイズ */
