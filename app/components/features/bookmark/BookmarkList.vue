@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { VueDraggable } from 'vue-draggable-plus'
 import type { Bookmark, BookmarkSort, TagWithCount } from '~/types'
 
 interface Stats {
@@ -15,10 +16,14 @@ interface Props {
   sort: BookmarkSort
   stats: Stats
   tags?: TagWithCount[]
+  isDragEnabled?: boolean
+  isReordering?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  tags: () => []
+  tags: () => [],
+  isDragEnabled: false,
+  isReordering: false
 })
 
 const searchQuery = defineModel<string>('searchQuery', { default: '' })
@@ -31,6 +36,7 @@ const emit = defineEmits<{
   'update:page': [page: number]
   'update:sort': [sort: BookmarkSort]
   'manage-tags': []
+  'reorder': [newList: Bookmark[], oldIndex: number, newIndex: number]
 }>()
 
 const {
@@ -42,6 +48,18 @@ const {
   totalCount: toRef(props, 'totalCount'),
   loading: toRef(props, 'loading')
 })
+
+// ドラッグ用ローカルリスト
+const draggableList = ref<Bookmark[]>([])
+
+watch(displayedBookmarks, (val) => {
+  draggableList.value = [...val]
+}, { immediate: true })
+
+const onDragEnd = (e: { oldIndex?: number, newIndex?: number }) => {
+  if (e.oldIndex == null || e.newIndex == null || e.oldIndex === e.newIndex) return
+  emit('reorder', [...draggableList.value], e.oldIndex, e.newIndex)
+}
 
 // ページネーションの総ページ数
 const totalPages = computed(() => Math.ceil(props.totalCount / props.perPage))
@@ -126,7 +144,33 @@ const { skipTransition } = useTransitionControl({
         </div>
       </Transition>
 
+      <VueDraggable
+        v-if="isDragEnabled"
+        v-model="draggableList"
+        :class="[gridClass, { 'pointer-events-none': isPageLoading || isReordering }]"
+        handle=".drag-handle"
+        :animation="200"
+        easing="ease-out"
+        :delay="200"
+        :delay-on-touch-only="true"
+        ghost-class="drag-ghost"
+        chosen-class="drag-chosen"
+        drag-class="drag-active"
+        @end="onDragEnd"
+      >
+        <BookmarkCard
+          v-for="bookmark in draggableList"
+          :key="bookmark.id"
+          :bookmark="bookmark"
+          :card-size="cardSize"
+          :show-drag-handle="true"
+          @edit="emit('edit', $event)"
+          @delete="emit('delete', $event)"
+        />
+      </VueDraggable>
+
       <TransitionGroup
+        v-else
         tag="div"
         :class="[gridClass, { 'pointer-events-none': isPageLoading }]"
         :enter-active-class="skipTransition ? '' : 'transition-all duration-300 ease-out'"

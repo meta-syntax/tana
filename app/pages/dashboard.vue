@@ -14,8 +14,10 @@ useSeoMeta({
 const {
   bookmarks, loading, stats,
   page, perPage, totalCount, sort, selectedTagIds,
+  isDragEnabled, isReordering,
   search, changeSort, changePage, filterByTags,
-  refreshBookmarks, addBookmark, updateBookmark, deleteBookmark
+  refreshBookmarks, addBookmark, updateBookmark, deleteBookmark,
+  reorderBookmarks
 } = useBookmarks()
 
 const {
@@ -44,6 +46,11 @@ const {
   refreshBookmarks,
   addTag
 })
+
+// 並び替え処理
+const handleReorder = (newList: Bookmark[], oldIndex: number, newIndex: number) => {
+  reorderBookmarks(newList, oldIndex, newIndex)
+}
 
 // 削除処理
 const deleting = ref(false)
@@ -92,6 +99,8 @@ const handleDeleteTag = async (id: string) => {
         :sort="sort"
         :stats="stats"
         :tags="tags ?? []"
+        :is-drag-enabled="isDragEnabled"
+        :is-reordering="isReordering"
         @add="openAddModal"
         @edit="openEditModal"
         @delete="handleDelete"
@@ -99,6 +108,7 @@ const handleDeleteTag = async (id: string) => {
         @update:sort="changeSort"
         @update:selected-tag-ids="filterByTags"
         @manage-tags="isTagManageModalOpen = true"
+        @reorder="handleReorder"
       />
     </UContainer>
 

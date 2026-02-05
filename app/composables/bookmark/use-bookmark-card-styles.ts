@@ -1,13 +1,21 @@
 import type { Ref } from 'vue'
 import type { CardSize } from '~/types'
 
-export const useBookmarkCardStyles = (cardSize: Ref<CardSize>) => {
-  const cardClasses = computed(() => [
-    'group relative overflow-hidden border border-(--tana-border) bg-default transition-all duration-300',
-    cardSize.value === 'large'
-      ? 'rounded-xl hover:-translate-y-1 hover:shadow-lg'
-      : 'rounded-lg hover:shadow-md'
-  ])
+export const useBookmarkCardStyles = (cardSize: Ref<CardSize>, isDraggable?: Ref<boolean>) => {
+  const cardClasses = computed(() => {
+    const draggable = isDraggable?.value ?? false
+    return [
+      'group relative overflow-hidden border border-(--tana-border) bg-default',
+      draggable
+        ? 'transition-[box-shadow,border-color,opacity] duration-300'
+        : 'transition-all duration-300',
+      cardSize.value === 'large'
+        ? draggable
+          ? 'rounded-xl hover:shadow-lg'
+          : 'rounded-xl hover:-translate-y-1 hover:shadow-lg'
+        : 'rounded-lg hover:shadow-md'
+    ]
+  })
 
   const thumbnailWrapperClasses = computed(() => ({
     'max-h-64 opacity-100': cardSize.value === 'large',

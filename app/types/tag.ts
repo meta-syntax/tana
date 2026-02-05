@@ -1,4 +1,4 @@
-import type { TagRow } from './database.types'
+import type { TagRow } from './database-helpers'
 
 /** タグ型（DBから取得した完全なデータ） */
 export type Tag = TagRow

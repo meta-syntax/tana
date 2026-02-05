@@ -5,10 +5,12 @@ import { extractHostname } from '~/utils/display-url'
 interface Props {
   bookmark: Bookmark
   cardSize?: CardSize
+  showDragHandle?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  cardSize: 'large'
+  cardSize: 'large',
+  showDragHandle: false
 })
 
 const emit = defineEmits<{
@@ -38,14 +40,25 @@ const handleDelete = () => {
 const {
   cardClasses, thumbnailWrapperClasses, contentClasses,
   titleClasses, descriptionClasses
-} = useBookmarkCardStyles(toRef(props, 'cardSize'))
+} = useBookmarkCardStyles(toRef(props, 'cardSize'), toRef(props, 'showDragHandle'))
 </script>
 
 <template>
   <div
     data-testid="bookmark-card"
     :class="cardClasses"
+    class="group relative"
   >
+    <div
+      v-if="showDragHandle"
+      class="drag-handle absolute left-2 top-2 z-10 flex cursor-grab items-center justify-center rounded-md bg-default/80 p-1 opacity-100 backdrop-blur-sm transition-opacity sm:opacity-0 sm:group-hover:opacity-100 active:cursor-grabbing"
+    >
+      <UIcon
+        name="i-heroicons-bars-3"
+        class="size-5 text-muted"
+      />
+    </div>
+
     <div
       data-testid="bookmark-thumbnail"
       class="overflow-hidden transition-all duration-300"
