@@ -40,6 +40,8 @@ export const useAuth = () => {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) throw error
+
+      await navigateTo('/dashboard')
     } catch (error) {
       console.error(error)
       const message = translateSupabaseAuthError(error, 'ログインに失敗しました。時間をおいて再度お試しください。')
@@ -58,29 +60,11 @@ export const useAuth = () => {
     await navigateTo('/login')
   }
 
-  const redirectIfAuthenticated = () => {
-    watchEffect(() => {
-      if (user.value) {
-        navigateTo('/dashboard')
-      }
-    })
-  }
-
-  const redirectIfUnauthenticated = () => {
-    watchEffect(() => {
-      if (!user.value) {
-        navigateTo('/login')
-      }
-    })
-  }
-
   return {
     user,
     loading,
     signIn,
     signUp,
-    signOut,
-    redirectIfAuthenticated,
-    redirectIfUnauthenticated
+    signOut
   }
 }

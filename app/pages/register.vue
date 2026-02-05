@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { z } from 'zod'
-import type { FormSubmitEvent } from '@nuxt/ui'
-
 definePageMeta({
-  layout: 'auth'
+  layout: 'auth',
+  middleware: 'guest'
 })
 
 useSeoMeta({
@@ -13,28 +11,7 @@ useSeoMeta({
   ogDescription: 'Tanaに無料登録して、ブックマーク管理を始めましょう。'
 })
 
-const { signUp, loading, redirectIfAuthenticated } = useAuth()
-
-redirectIfAuthenticated()
-
-const registerSchema = z.object({
-  email: z
-    .email('有効なメールアドレスを入力してください'),
-  password: z
-    .string()
-    .min(8, 'パスワードは8文字以上で入力してください')
-})
-
-type RegisterSchema = z.output<typeof registerSchema>
-
-const state = reactive({
-  email: '',
-  password: ''
-})
-
-const onSubmit = async (event: FormSubmitEvent<RegisterSchema>) => {
-  await signUp(event.data.email, event.data.password)
-}
+const { schema, state, loading, onSubmit } = useAuthForm({ mode: 'register' })
 </script>
 
 <template>
@@ -53,7 +30,7 @@ const onSubmit = async (event: FormSubmitEvent<RegisterSchema>) => {
       >
         <template #form>
           <UForm
-            :schema="registerSchema"
+            :schema="schema"
             :state="state"
             class="space-y-4"
             @submit="onSubmit"

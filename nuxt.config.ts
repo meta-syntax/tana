@@ -12,6 +12,15 @@ export default defineNuxtConfig({
     }
   ],
 
+  imports: {
+    dirs: [
+      'composables/bookmark',
+      'composables/auth',
+      'composables/tag',
+      'composables/ui'
+    ]
+  },
+
   devtools: { enabled: true },
 
   app: {
@@ -43,6 +52,15 @@ export default defineNuxtConfig({
           crawlLinks: true
         },
     routeRules: {
+      '/**': {
+        headers: {
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'DENY',
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+          'X-XSS-Protection': '0',
+          'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'
+        }
+      },
       '/_nuxt/**': {
         headers: {
           'Cache-Control': 'public, max-age=31536000, immutable'

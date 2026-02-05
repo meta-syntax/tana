@@ -5,7 +5,7 @@ import type { Ref, ComputedRef } from 'vue'
  * @param date - 日付の文字列またはRef/ComputedRef
  * @returns relativeTime - 相対時間の文字列, updateRelativeTime - 時間を更新する関数
  */
-export function useRelativeTime(date: Ref<string | null | undefined> | ComputedRef<string | null | undefined>) {
+export const useRelativeTime = (date: Ref<string | null | undefined> | ComputedRef<string | null | undefined>) => {
   const relativeTime = ref('')
 
   const updateRelativeTime = () => {

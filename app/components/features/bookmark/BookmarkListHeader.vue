@@ -11,7 +11,8 @@ interface Props {
 const props = defineProps<Props>()
 
 const emit = defineEmits<{
-  add: []
+  'add': []
+  'manage-tags': []
 }>()
 </script>
 
@@ -39,12 +40,22 @@ const emit = defineEmits<{
         </span>
       </div>
     </div>
-    <UButton
-      icon="i-heroicons-plus"
-      class="bg-(--tana-accent) text-white hover:bg-(--tana-accent-strong)"
-      @click="emit('add')"
-    >
-      URLを追加
-    </UButton>
+    <div class="flex items-center gap-2">
+      <UButton
+        variant="ghost"
+        color="neutral"
+        icon="i-heroicons-tag"
+        @click="emit('manage-tags')"
+      >
+        タグ管理
+      </UButton>
+      <UButton
+        icon="i-heroicons-plus"
+        class="bg-(--tana-accent) text-white hover:bg-(--tana-accent-strong)"
+        @click="emit('add')"
+      >
+        URLを追加
+      </UButton>
+    </div>
   </div>
 </template>

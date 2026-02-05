@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Bookmark, CardSize } from '~/types'
+import { extractHostname } from '~/utils/display-url'
 
 interface Props {
   bookmark: Bookmark
@@ -15,16 +16,8 @@ const emit = defineEmits<{
   delete: [bookmark: Bookmark]
 }>()
 
-// 表示用データの計算
 const displayTitle = computed(() => props.bookmark.title || props.bookmark.url)
-
-const displayUrl = computed(() => {
-  try {
-    return new URL(props.bookmark.url).hostname
-  } catch {
-    return props.bookmark.url
-  }
-})
+const displayUrl = computed(() => extractHostname(props.bookmark.url))
 
 // 相対時間（クライアントサイドのみ）
 const { relativeTime, updateRelativeTime } = useRelativeTime(
@@ -42,33 +35,10 @@ const handleDelete = () => {
 }
 
 // 動的クラス
-const cardClasses = computed(() => [
-  'group relative overflow-hidden border border-(--tana-border) bg-default transition-all duration-300',
-  props.cardSize === 'large'
-    ? 'rounded-xl hover:-translate-y-1 hover:shadow-lg'
-    : 'rounded-lg hover:shadow-md'
-])
-
-const thumbnailWrapperClasses = computed(() => ({
-  'max-h-64 opacity-100': props.cardSize === 'large',
-  'max-h-28 opacity-100': props.cardSize === 'medium',
-  'max-h-0 opacity-0': props.cardSize === 'small'
-}))
-
-const contentClasses = computed(() => ({
-  'p-4': props.cardSize === 'large',
-  'p-2.5': props.cardSize !== 'large'
-}))
-
-const titleClasses = computed(() => [
-  'font-medium text-highlighted transition-colors hover:text-(--tana-accent)',
-  props.cardSize === 'large' ? 'line-clamp-2' : 'line-clamp-1 text-sm'
-])
-
-const descriptionClasses = computed(() => ({
-  'max-h-20 opacity-100 mt-2': props.cardSize === 'large',
-  'max-h-0 opacity-0 mt-0': props.cardSize !== 'large'
-}))
+const {
+  cardClasses, thumbnailWrapperClasses, contentClasses,
+  titleClasses, descriptionClasses
+} = useBookmarkCardStyles(toRef(props, 'cardSize'))
 </script>
 
 <template>
@@ -102,6 +72,18 @@ const descriptionClasses = computed(() => ({
           {{ displayTitle }}
         </h3>
       </a>
+
+      <div
+        v-if="bookmark.tags && bookmark.tags.length > 0 && cardSize !== 'small'"
+        class="mt-1.5 flex flex-wrap gap-1"
+      >
+        <TagBadge
+          v-for="tag in bookmark.tags"
+          :key="tag.id"
+          :name="tag.name"
+          :color="tag.color"
+        />
+      </div>
 
       <div
         v-if="bookmark.description"

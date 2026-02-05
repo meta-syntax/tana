@@ -20,7 +20,7 @@ mockNuxtImport('useCardSize', () => {
   })
 })
 
-function findButtonByIcon(wrapper: VueWrapper, iconName: string): ReturnType<VueWrapper['find']> | undefined {
+const findButtonByIcon = (wrapper: VueWrapper, iconName: string): ReturnType<VueWrapper['find']> | undefined => {
   return wrapper.findAll('button').find(btn => btn.html().includes(iconName))
 }
 

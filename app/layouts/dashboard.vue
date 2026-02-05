@@ -1,7 +1,5 @@
 <script setup lang="ts">
-const { user, signOut, redirectIfUnauthenticated } = useAuth()
-
-redirectIfUnauthenticated()
+const { user, signOut } = useAuth()
 
 defineSlots<{
   default(): VNode[]

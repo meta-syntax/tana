@@ -2,7 +2,7 @@ import type { CardSize } from '~/types'
 
 const COOKIE_KEY = 'tana-card-size'
 
-export function useCardSize() {
+export const useCardSize = () => {
   const cardSize = useCookie<CardSize>(COOKIE_KEY, { default: () => 'large' })
 
   const setCardSize = (size: CardSize) => {

@@ -1,7 +1,21 @@
 import type { BookmarkRow } from './database.types'
+import type { Tag } from './tag'
+
+/** Supabase JOINクエリ bookmark_tags(tag_id, tags(*)) のレスポンス行型 */
+export interface BookmarkTagJoinRow {
+  tag_id: string
+  tags: Tag | null
+}
+
+/** bookmarks + bookmark_tags JOIN クエリのレスポンス型 */
+export type BookmarkWithJoinedTags = BookmarkRow & {
+  bookmark_tags: BookmarkTagJoinRow[]
+}
 
 /** ブックマーク型（DBから取得した完全なデータ） */
-export type Bookmark = BookmarkRow
+export type Bookmark = BookmarkRow & {
+  tags?: Tag[]
+}
 
 /** ブックマーク作成/更新時のフォーム入力型 */
 export interface BookmarkInput {
@@ -9,6 +23,7 @@ export interface BookmarkInput {
   title?: string | null
   description?: string | null
   thumbnail_url?: string | null
+  tag_ids?: string[]
 }
 
 /** カードサイズ */

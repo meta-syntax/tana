@@ -71,4 +71,13 @@ describe('useBookmarks', () => {
     changePage(3)
     expect(page.value).toBe(3)
   })
+
+  it('filterByTags() が selectedTagIds をセットし page を 1 にリセット', async () => {
+    const { useBookmarks } = await import('./use-bookmarks')
+    const { page, selectedTagIds, filterByTags } = useBookmarks()
+    page.value = 5
+    filterByTags(['tag-1', 'tag-2'])
+    expect(selectedTagIds.value).toEqual(['tag-1', 'tag-2'])
+    expect(page.value).toBe(1)
+  })
 })
