@@ -18,7 +18,7 @@ test.describe('ブックマークCRUD', () => {
     await expect(page.getByText('ブックマークを追加しました', { exact: true })).toBeVisible()
 
     // 一覧に表示されることを確認
-    await expect(page.getByText(TEST_TITLE)).toBeVisible()
+    await expect(page.getByText(TEST_TITLE).first()).toBeVisible()
 
     // 削除: カード内のゴミ箱ボタン（error色のUButton）をクリック
     const card = page.locator('.group', { hasText: TEST_TITLE }).first()

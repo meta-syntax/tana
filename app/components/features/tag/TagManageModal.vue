@@ -106,6 +106,7 @@ const handleDelete = () => {
                   color="neutral"
                   size="xs"
                   icon="i-heroicons-pencil-square"
+                  :aria-label="`${tag.name}を編集`"
                   @click="startEdit(tag)"
                 />
                 <UButton
@@ -113,6 +114,7 @@ const handleDelete = () => {
                   color="error"
                   size="xs"
                   icon="i-heroicons-trash"
+                  :aria-label="`${tag.name}を削除`"
                   @click="confirmDelete(tag)"
                 />
               </div>

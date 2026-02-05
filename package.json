@@ -15,7 +15,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "db:types": "supabase gen types typescript --linked > app/types/database.types.ts"
+    "db:types": "supabase gen types typescript --linked > app/types/database.types.ts",
+    "db:seed": "npx tsx --env-file=.env scripts/seed.ts"
   },
   "dependencies": {
     "@fontsource/zen-kaku-gothic-new": "^5.2.7",

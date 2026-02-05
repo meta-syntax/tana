@@ -17,9 +17,7 @@ export type AuthSchema = z.output<typeof authSchema>
 
 export const useAuthForm = (options: UseAuthFormOptions) => {
   const { mode } = options
-  const { signIn, signUp, loading, redirectIfAuthenticated } = useAuth()
-
-  redirectIfAuthenticated()
+  const { signIn, signUp, loading } = useAuth()
 
   const state = reactive({
     email: '',

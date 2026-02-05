@@ -2,7 +2,8 @@
 import type { Bookmark, TagInput } from '~/types'
 
 definePageMeta({
-  layout: 'dashboard'
+  layout: 'dashboard',
+  middleware: 'auth'
 })
 
 useSeoMeta({
