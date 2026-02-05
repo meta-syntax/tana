@@ -147,6 +147,31 @@ describe('BookmarkList', () => {
     expect(queries.queryByTestId('bookmark-pagination')).toBeNull()
   })
 
+  it('tags propを渡すとTagFilterが表示される', async () => {
+    const tags = [
+      { id: 'tag-1', user_id: 'u1', name: 'Vue', color: '#22c55e', created_at: '', updated_at: '', bookmark_count: 3 },
+      { id: 'tag-2', user_id: 'u1', name: 'React', color: '#3b82f6', created_at: '', updated_at: '', bookmark_count: 5 }
+    ]
+
+    const wrapper = await mountSuspended(BookmarkList, {
+      props: { ...defaultProps, tags }
+    })
+
+    expect(wrapper.text()).toContain('Vue')
+    expect(wrapper.text()).toContain('React')
+  })
+
+  it('「タグ管理」ボタンでmanage-tagsイベント発火', async () => {
+    const wrapper = await mountSuspended(BookmarkList, {
+      props: defaultProps
+    })
+
+    const queries = within(wrapper.element as HTMLElement)
+    const manageTagsButton = queries.getByRole('button', { name: /タグ管理/ })
+    manageTagsButton.click()
+    expect(wrapper.emitted('manage-tags')).toBeTruthy()
+  })
+
   it('空状態の「追加」ボタン動作', async () => {
     const wrapper = await mountSuspended(BookmarkList, {
       props: {

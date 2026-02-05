@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Bookmark, BookmarkInput, BookmarkSort, TagInput } from '~/types'
+import type { Bookmark, TagInput } from '~/types'
 
 definePageMeta({
   layout: 'dashboard'
@@ -31,68 +31,18 @@ watch(debouncedQuery, (query) => {
   search(query)
 })
 
-// ソート変更
-const handleSortChange = (newSort: BookmarkSort) => {
-  changeSort(newSort)
-}
-
-// ページ変更
-const handlePageChange = (newPage: number) => {
-  changePage(newPage)
-}
-
-// タグフィルター変更
-const handleTagFilterChange = (tagIds: string[]) => {
-  filterByTags(tagIds)
-}
-
 // モーダル制御
-const isModalOpen = ref(false)
-const editingBookmark = ref<Bookmark | null>(null)
-
-const openAddModal = () => {
-  editingBookmark.value = null
-  isModalOpen.value = true
-}
-
-const openEditModal = (bookmark: Bookmark) => {
-  editingBookmark.value = bookmark
-  isModalOpen.value = true
-}
-
-// 保存処理
-const handleSave = async (data: BookmarkInput) => {
-  const tagIds = data.tag_ids ?? []
-
-  if (editingBookmark.value) {
-    const success = await updateBookmark(editingBookmark.value.id, data)
-    if (success) {
-      await syncBookmarkTags(editingBookmark.value.id, tagIds)
-      await refreshBookmarks()
-      isModalOpen.value = false
-      editingBookmark.value = null
-    }
-  } else {
-    const result = await addBookmark(data)
-    if (result.success && result.id) {
-      if (tagIds.length > 0) {
-        await syncBookmarkTags(result.id, tagIds)
-        await refreshBookmarks()
-      }
-      isModalOpen.value = false
-      editingBookmark.value = null
-    }
-  }
-}
-
-// モーダル内でタグ新規作成
-const handleCreateTagFromModal = async (input: { name: string, color: string }) => {
-  const tag = await addTag(input)
-  if (tag && editingBookmark.value) {
-    // 編集中のフォームに新タグを追加するため、refreshTagsで反映
-  }
-  return tag
-}
+const {
+  isModalOpen, editingBookmark,
+  openAddModal, openEditModal,
+  handleSave, handleCreateTagFromModal
+} = useBookmarkModal({
+  updateBookmark,
+  addBookmark,
+  syncBookmarkTags,
+  refreshBookmarks,
+  addTag
+})
 
 // 削除処理
 const deleting = ref(false)
@@ -122,7 +72,6 @@ const handleUpdateTag = async (id: string, input: TagInput) => {
 
 const handleDeleteTag = async (id: string) => {
   await deleteTag(id)
-  // フィルターから削除されたタグを除去
   selectedTagIds.value = selectedTagIds.value.filter(tagId => tagId !== id)
   await refreshBookmarks()
 }
@@ -145,9 +94,9 @@ const handleDeleteTag = async (id: string) => {
         @add="openAddModal"
         @edit="openEditModal"
         @delete="handleDelete"
-        @update:page="handlePageChange"
-        @update:sort="handleSortChange"
-        @update:selected-tag-ids="handleTagFilterChange"
+        @update:page="changePage"
+        @update:sort="changeSort"
+        @update:selected-tag-ids="filterByTags"
         @manage-tags="isTagManageModalOpen = true"
       />
     </UContainer>
@@ -155,7 +104,7 @@ const handleDeleteTag = async (id: string) => {
     <BookmarkModal
       v-model:open="isModalOpen"
       :bookmark="editingBookmark"
-      :tags="(tags as any) ?? []"
+      :tags="tags ?? []"
       @save="handleSave"
       @create-tag="handleCreateTagFromModal"
     />

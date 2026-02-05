@@ -29,7 +29,6 @@ URLを入力するとタイトル・説明・画像を自動取得し、リッ�
 components/
 ├── common/           # 共通コンポーネント（複数ページで再利用）
 ├── features/         # 機能単位のコンポーネント
-│   └── bookmark/     # ブックマーク機能
 └── pages/            # ページ固有のコンポーネント
     ├── dashboard/
     ├── home/
@@ -44,7 +43,16 @@ components/
 
 #### composables
 
-再利用可能なロジックは積極的にcomposablesに切り出す
+再利用可能なロジックは積極的にcomposablesに切り出す。
+ドメイン別にサブディレクトリを分け、`nuxt.config.ts`の`imports.dirs`で各ディレクトリを自動インポート対象に設定する。
+データ操作はCQRSパターン（query / mutations / facade）で分割する。
+
+| ディレクトリ      | 基準                 |
+|-------------|--------------------|
+| `bookmark/` | ブックマークのデータ操作・UI制御  |
+| `auth/`     | ユーザー認証・セッション管理     |
+| `tag/`      | タグのデータ操作・UI制御      |
+| `ui/`       | ドメインに依存しない汎用UIロジック |
 
 ## Coding Rules
 
@@ -76,7 +84,7 @@ components/
 - デフォルト値は`withDefaults`を使用
 
 ```typescript
-// ❌ BAD: ランタイムバリデーション
+// BAD: ランタイムバリデーション
 const props = defineProps({
   tech: {
     type: Object,
@@ -84,7 +92,7 @@ const props = defineProps({
   }
 })
 
-// ✅ GOOD: TypeScript型定義
+// GOOD: TypeScript型定義
 interface Props {
   tech: Tech
   index: number
@@ -100,19 +108,6 @@ const props = withDefaults(defineProps<Props>(), {
 
 - `v-model`には`defineModel`を使用する
 
-```typescript
-// ❌ BAD: 手動でprops/emit定義
-const props = defineProps<{ open: boolean }>()
-const emit = defineEmits<{ 'update:open': [value: boolean] }>()
-const isOpen = computed({
-  get: () => props.open,
-  set: value => emit('update:open', value)
-})
-
-// ✅ GOOD: defineModelを使用
-const isOpen = defineModel<boolean>('open', { required: true })
-```
-
 ### 6. Styling
 
 - Nuxt UIのデザインシステムに従う
@@ -122,6 +117,12 @@ const isOpen = defineModel<boolean>('open', { required: true })
 - CSS変数を使用する場合、`var()`は不要: `bg-(--tana-accent)`
   - **Bad:** `bg-[var(--tana-accent)]`
 
+### 7. Test
+
+- Vitest + @nuxt/test-utilsでユニットテスト・統合テストを実装
+- テスティングトロフィーを意識したテスト設計を行う
+  - E2Eは機能を絞って実装すること
+  - 統合テスト(Components/)とユニットテスト(Composables/)を主に実装すること
 
 ## Quality
 

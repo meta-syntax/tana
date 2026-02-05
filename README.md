@@ -41,11 +41,17 @@ Nuxt 4は2025年にリリースされた最新メジャーバージョン。新�
 
 ### Composablesの責務分離
 
-ブックマーク操作のcomposablesは、CQRS（Command Query Responsibility Segregation）の考え方を参考に設計した。
+ブックマーク・タグ操作のcomposablesは、CQRS（Command Query Responsibility Segregation）の考え方を参考に設計した。
 
+**ブックマーク:**
 - **`use-bookmark-query.ts`** - データの読み取り（検索・ページネーション・ソート）
 - **`use-bookmark-mutations.ts`** - データの書き込み（追加・更新・削除 + 楽観的UI）
 - **`use-bookmarks.ts`** - 上記を統合するファサード
+
+**タグ:**
+- **`use-tag-query.ts`** - タグ一覧の取得（件数付き）
+- **`use-tag-mutations.ts`** - タグのCRUD・ブックマーク紐付け同期
+- **`use-tags.ts`** - 上記を統合するファサード
 
 読み取りと書き込みでは要件が異なる（読み取りはリアクティブな依存関係の管理、書き込みは楽観的更新とロールバック）ため、分離することで各composableの責務を明確にし、テスタビリティを高めている。
 
@@ -63,7 +69,11 @@ app/
 │       ├── auth/
 │       ├── dashboard/
 │       └── home/
-├── composables/         # 再利用ロジック (認証, ブックマーク, OGP, 相対時間)
+├── composables/
+│   ├── bookmark/       # ブックマーク (query / mutations / facade + UI)
+│   ├── auth/           # 認証
+│   ├── tag/            # タグ (query / mutations / facade + UI)
+│   └── ui/             # UI共通ロジック (OGP, 相対時間, ページネーション等)
 ├── layouts/             # レイアウト (auth, dashboard, marketing)
 ├── pages/               # ルーティング
 ├── server/api/          # サーバーAPI (OGP取得エンドポイント)

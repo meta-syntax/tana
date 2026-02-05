@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { Tag } from '~/types'
+import type { Tag, TagWithCount } from '~/types'
 import { DEFAULT_TAG_COLOR } from '~/constants/tag-colors'
 
 interface Props {
-  tags: Tag[]
+  tags: (Tag | TagWithCount)[]
 }
 
 const props = defineProps<Props>()

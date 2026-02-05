@@ -1,40 +1,16 @@
-import type { Database, Tag, TagInput, TagRowWithCountJoin, TagWithCount } from '~/types'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import type { Database, Tag, TagInput } from '~/types'
 
-export const useTags = () => {
-  const supabase = useSupabaseClient<Database>()
-  const user = useSupabaseUser()
+interface UseTagMutationsOptions {
+  supabase: SupabaseClient<Database>
+  user: ReturnType<typeof useSupabaseUser>
+  refreshTags: () => Promise<void>
+  getBookmarkTagIds: (bookmarkId: string) => Promise<string[]>
+}
+
+export const useTagMutations = (options: UseTagMutationsOptions) => {
+  const { supabase, user, refreshTags, getBookmarkTagIds } = options
   const toast = useToast()
-
-  // タグ一覧取得（件数付き）
-  const { data: tags, status, refresh: refreshTags } = useLazyAsyncData(
-    'tags',
-    async () => {
-      if (!user.value?.sub) return [] as TagWithCount[]
-
-      const { data, error } = await supabase
-        .from('tags')
-        .select('*, bookmark_tags(count)')
-        .eq('user_id', user.value.sub)
-        .order('name')
-
-      if (error) {
-        console.error('Failed to fetch tags:', error)
-        return [] as TagWithCount[]
-      }
-
-      const rows = (data ?? []) as TagRowWithCountJoin[]
-      return rows.map((tag): TagWithCount => {
-        const { bookmark_tags, ...rest } = tag
-        return { ...rest, bookmark_count: bookmark_tags?.[0]?.count ?? 0 }
-      })
-    },
-    {
-      default: () => [] as TagWithCount[],
-      watch: [user]
-    }
-  )
-
-  const tagsLoading = computed(() => status.value === 'pending')
 
   // タグ追加
   const addTag = async (input: TagInput): Promise<Tag | null> => {
@@ -123,21 +99,6 @@ export const useTags = () => {
     return true
   }
 
-  // ブックマークに紐付くタグID取得
-  const getBookmarkTagIds = async (bookmarkId: string): Promise<string[]> => {
-    const { data, error } = await supabase
-      .from('bookmark_tags')
-      .select('tag_id')
-      .eq('bookmark_id', bookmarkId)
-
-    if (error) {
-      console.error('Failed to get bookmark tags:', error)
-      return []
-    }
-
-    return (data ?? []).map(row => row.tag_id)
-  }
-
   // ブックマークとタグの紐付け同期（差分計算）
   const syncBookmarkTags = async (bookmarkId: string, tagIds: string[]): Promise<boolean> => {
     const currentTagIds = await getBookmarkTagIds(bookmarkId)
@@ -182,13 +143,9 @@ export const useTags = () => {
   }
 
   return {
-    tags,
-    tagsLoading,
-    refreshTags,
     addTag,
     updateTag,
     deleteTag,
-    getBookmarkTagIds,
     syncBookmarkTags
   }
 }

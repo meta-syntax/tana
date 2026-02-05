@@ -33,49 +33,14 @@ const emit = defineEmits<{
   'manage-tags': []
 }>()
 
-// 検索状態の管理
-const isSearching = ref(false)
-const displayedBookmarks = ref<Bookmark[]>([])
-const lastAppliedQuery = ref('')
-
-// props.bookmarksの変更を検知
-watch(
-  () => props.bookmarks,
-  (newBookmarks) => {
-    if (searchQuery.value.trim()) {
-      isSearching.value = true
-      setTimeout(() => {
-        displayedBookmarks.value = newBookmarks
-        lastAppliedQuery.value = searchQuery.value
-        isSearching.value = false
-      }, 300)
-    } else {
-      displayedBookmarks.value = newBookmarks
-      lastAppliedQuery.value = ''
-      isSearching.value = false
-    }
-  },
-  { immediate: true }
-)
-
-// 検索結果が0件かどうか
-const isSearchEmpty = computed(() =>
-  !isSearching.value && lastAppliedQuery.value.trim() !== '' && displayedBookmarks.value.length === 0
-)
-
-// 検索結果の件数表示
-const searchResultText = computed(() => {
-  if (!lastAppliedQuery.value.trim()) return ''
-  return `${props.totalCount}件の結果`
-})
-
-// 表示する状態を決定
-const displayState = computed(() => {
-  if (props.loading && props.bookmarks.length === 0) return 'initial-loading'
-  if (isSearching.value) return 'searching'
-  if (isSearchEmpty.value) return 'search-empty'
-  if (!props.loading && props.totalCount === 0 && !searchQuery.value.trim()) return 'initial-empty'
-  return 'list'
+const {
+  isSearching, displayedBookmarks, lastAppliedQuery,
+  searchResultText, displayState
+} = useBookmarkSearch({
+  bookmarks: toRef(props, 'bookmarks'),
+  searchQuery,
+  totalCount: toRef(props, 'totalCount'),
+  loading: toRef(props, 'loading')
 })
 
 // ページネーションの総ページ数
@@ -90,18 +55,9 @@ const isPageLoading = computed(() =>
 const { cardSize, gridClass } = useCardSize()
 
 // ページ/ソート切り替え時はTransitionGroupアニメーションをスキップ
-const skipTransition = ref(false)
-
-watch([() => props.page, () => props.sort], () => {
-  skipTransition.value = true
-})
-
-watch(isPageLoading, (loading) => {
-  if (!loading && skipTransition.value) {
-    nextTick(() => {
-      skipTransition.value = false
-    })
-  }
+const { skipTransition } = useTransitionControl({
+  triggers: [toRef(props, 'page'), toRef(props, 'sort')],
+  isLoading: isPageLoading
 })
 </script>
 

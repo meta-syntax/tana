@@ -206,7 +206,8 @@ describe('BookmarkModal', () => {
       url: 'https://example.com',
       title: 'テストタイトル',
       description: null,
-      thumbnail_url: null
+      thumbnail_url: null,
+      tag_ids: []
     })
   })
 
@@ -225,6 +226,38 @@ describe('BookmarkModal', () => {
     const updateEvents = wrapper.emitted('update:open')
     expect(updateEvents).toBeTruthy()
     expect(updateEvents!.some(e => e[0] === false)).toBe(true)
+  })
+
+  it('tags propを渡すとTagSelectが表示される', async () => {
+    const tags = [
+      { id: 'tag-1', user_id: 'u1', name: 'Vue', color: '#22c55e', created_at: '', updated_at: '' },
+      { id: 'tag-2', user_id: 'u1', name: 'React', color: '#3b82f6', created_at: '', updated_at: '' }
+    ]
+
+    wrapper = await mountSuspended(BookmarkModal, {
+      props: { 'open': true, 'onUpdate:open': vi.fn(), tags },
+      attachTo: document.body
+    })
+
+    expect(document.body.textContent).toContain('タグ')
+  })
+
+  it('create-tagイベントが伝播する', async () => {
+    wrapper = await mountSuspended(BookmarkModal, {
+      props: { 'open': true, 'onUpdate:open': vi.fn(), 'tags': [] },
+      attachTo: document.body
+    })
+
+    // TagSelectコンポーネントからcreate-tagイベントをトリガー
+    const tagSelect = wrapper.findComponent({ name: 'TagSelect' })
+    if (tagSelect.exists()) {
+      tagSelect.vm.$emit('create-tag', { name: 'NewTag', color: '#3b82f6' })
+      await wrapper.vm.$nextTick()
+
+      const events = wrapper.emitted('create-tag')
+      expect(events).toBeTruthy()
+      expect(events![0]![0]).toEqual({ name: 'NewTag', color: '#3b82f6' })
+    }
   })
 
   it('再オープン時にフォームリセット', async () => {

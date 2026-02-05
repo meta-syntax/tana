@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { TagInput, TagWithCount } from '~/types'
-import { DEFAULT_TAG_COLOR } from '~/constants/tag-colors'
 
 interface Props {
   tags: TagWithCount[]
@@ -16,60 +15,25 @@ const emit = defineEmits<{
   delete: [id: string]
 }>()
 
-// 新規タグフォーム
-const newTagName = ref('')
-const newTagColor = ref(DEFAULT_TAG_COLOR)
+const {
+  newTagName, newTagColor, prepareAdd,
+  editingTagId, editingName, editingColor, startEdit, cancelEdit, prepareSaveEdit,
+  deletingTag, isDeleteModalOpen, confirmDelete, prepareDelete
+} = useTagManagement()
 
 const handleAdd = () => {
-  const name = newTagName.value.trim()
-  if (!name) return
-
-  emit('add', { name, color: newTagColor.value })
-  newTagName.value = ''
-  newTagColor.value = DEFAULT_TAG_COLOR
-}
-
-// 編集中タグ
-const editingTagId = ref<string | null>(null)
-const editingName = ref('')
-const editingColor = ref('')
-
-const startEdit = (tag: TagWithCount) => {
-  editingTagId.value = tag.id
-  editingName.value = tag.name
-  editingColor.value = tag.color
-}
-
-const cancelEdit = () => {
-  editingTagId.value = null
-  editingName.value = ''
-  editingColor.value = ''
+  const input = prepareAdd()
+  if (input) emit('add', input)
 }
 
 const saveEdit = () => {
-  if (!editingTagId.value || !editingName.value.trim()) return
-
-  emit('update', editingTagId.value, {
-    name: editingName.value.trim(),
-    color: editingColor.value
-  })
-  cancelEdit()
-}
-
-// 削除
-const deletingTag = ref<TagWithCount | null>(null)
-const isDeleteModalOpen = ref(false)
-
-const confirmDelete = (tag: TagWithCount) => {
-  deletingTag.value = tag
-  isDeleteModalOpen.value = true
+  const result = prepareSaveEdit()
+  if (result) emit('update', result.id, result.input)
 }
 
 const handleDelete = () => {
-  if (!deletingTag.value) return
-  emit('delete', deletingTag.value.id)
-  deletingTag.value = null
-  isDeleteModalOpen.value = false
+  const id = prepareDelete()
+  if (id) emit('delete', id)
 }
 </script>
 
