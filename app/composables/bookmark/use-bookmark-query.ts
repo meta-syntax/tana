@@ -67,8 +67,12 @@ export const useBookmarkQuery = (options: UseBookmarkQueryOptions) => {
         query = query.or(`title.ilike.%${q}%,url.ilike.%${q}%,description.ilike.%${q}%`)
       }
 
-      // ソート
-      query = query.order(sort.value.field, { ascending: sort.value.order === 'asc' })
+      // ソート（sort_orderは常にASC固定）
+      if (sort.value.field === 'sort_order') {
+        query = query.order('sort_order', { ascending: true })
+      } else {
+        query = query.order(sort.value.field, { ascending: sort.value.order === 'asc' })
+      }
 
       // ページネーション
       query = query.range(from, to)

@@ -121,6 +121,21 @@ html::-webkit-scrollbar-thumb:hover {
   animation: fade-in 0.3s ease-out both;
 }
 
+/* Drag and drop styles */
+.drag-ghost {
+  opacity: 0.3;
+}
+
+.drag-chosen {
+  opacity: 0.8;
+  transform: scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.drag-active {
+  cursor: grabbing;
+}
+
 /* Page transition */
 .page-enter-active,
 .page-leave-active {

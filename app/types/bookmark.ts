@@ -1,4 +1,4 @@
-import type { BookmarkRow } from './database.types'
+import type { BookmarkRow } from './database-helpers'
 import type { Tag } from './tag'
 
 /** Supabase JOINクエリ bookmark_tags(tag_id, tags(*)) のレスポンス行型 */
@@ -33,7 +33,7 @@ export type CardSize = 'large' | 'medium' | 'small'
 export type PerPage = 12 | 24 | 48
 
 /** ソート対象フィールド */
-export type SortField = 'created_at' | 'title' | 'url'
+export type SortField = 'created_at' | 'title' | 'url' | 'sort_order'
 
 /** ソート順 */
 export type SortOrder = 'asc' | 'desc'

@@ -6,6 +6,9 @@ import tseslint from 'typescript-eslint'
 export default withNuxt(
   js.configs.recommended,
   {
+    ignores: ['app/types/database.types.ts']
+  },
+  {
     files: ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts'],
     extends: [...tseslint.configs.recommended]
   },

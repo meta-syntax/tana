@@ -1,5 +1,23 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Bookmark, BookmarkInput, Database } from '~/types'
+import type { Bookmark, BookmarkInput, Database, Json } from '~/types'
+
+const SORT_ORDER_GAP = 1000
+const MIN_GAP = 2
+
+/** 前後のsort_orderから中間値を計算 */
+const calcMidSortOrder = (prev: number | null, next: number | null): number => {
+  const p = prev ?? 0
+  const n = next ?? p + SORT_ORDER_GAP
+  return Math.floor((p + n) / 2)
+}
+
+/** ページ内全アイテムを1000刻みで再付与 */
+const rebuildSortOrders = (items: Bookmark[]): { id: string, sort_order: number }[] => {
+  return items.map((item, index) => ({
+    id: item.id,
+    sort_order: (index + 1) * SORT_ORDER_GAP
+  }))
+}
 
 interface UseBookmarkMutationsOptions {
   supabase: SupabaseClient<Database>
@@ -18,16 +36,17 @@ export const useBookmarkMutations = (options: UseBookmarkMutationsOptions) => {
     if (!user.value?.sub) return { success: false, id: null }
 
     // 楽観的にローカルへ追加（仮ID）
-    const optimisticBookmark = {
+    const optimisticBookmark: Bookmark = {
       id: crypto.randomUUID(),
       user_id: user.value.sub,
       url: input.url,
       title: input.title || null,
       description: input.description || null,
       thumbnail_url: input.thumbnail_url || null,
+      sort_order: 0,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
-    } as Bookmark
+    }
     bookmarks.value = [optimisticBookmark, ...bookmarks.value]
 
     const { data, error } = await supabase
@@ -37,7 +56,8 @@ export const useBookmarkMutations = (options: UseBookmarkMutationsOptions) => {
         url: input.url,
         title: input.title || null,
         description: input.description || null,
-        thumbnail_url: input.thumbnail_url || null
+        thumbnail_url: input.thumbnail_url || null,
+        sort_order: 0
       })
       .select('id')
       .single()
@@ -155,9 +175,80 @@ export const useBookmarkMutations = (options: UseBookmarkMutationsOptions) => {
     return true
   }
 
+  // 並び替え
+  const isReordering = ref(false)
+
+  const reorderBookmarks = async (newList: Bookmark[], oldIndex: number, newIndex: number) => {
+    if (isReordering.value) return
+    if (!user.value?.sub) return
+
+    isReordering.value = true
+    const snapshot = [...bookmarks.value]
+
+    // 楽観的UI更新
+    bookmarks.value = newList
+
+    try {
+      const movedItem = newList[newIndex]
+      if (!movedItem) return
+
+      const prevItem = newIndex > 0 ? newList[newIndex - 1] : null
+      const nextItem = newIndex < newList.length - 1 ? newList[newIndex + 1] : null
+
+      const prevOrder = prevItem?.sort_order ?? null
+      const nextOrder = nextItem?.sort_order ?? null
+      const newSortOrder = calcMidSortOrder(prevOrder, nextOrder)
+
+      // ギャップ枯渇チェック: 前後との差が最小ギャップ未満ならリバランス
+      const needsRebalance
+        = (prevOrder !== null && Math.abs(newSortOrder - prevOrder) < MIN_GAP)
+          || (nextOrder !== null && Math.abs(nextOrder - newSortOrder) < MIN_GAP)
+
+      let updates: { id: string, sort_order: number }[]
+
+      if (needsRebalance) {
+        updates = rebuildSortOrders(newList)
+      } else {
+        updates = [{ id: movedItem.id, sort_order: newSortOrder }]
+      }
+
+      const p_updates: Json = JSON.parse(JSON.stringify(updates))
+      const { error } = await supabase.rpc('reorder_bookmarks', {
+        p_user_id: user.value.sub,
+        p_updates
+      })
+
+      if (error) throw error
+
+      // ローカルのsort_orderも更新
+      if (needsRebalance) {
+        bookmarks.value = newList.map((b, i) => ({
+          ...b,
+          sort_order: (i + 1) * SORT_ORDER_GAP
+        }))
+      } else {
+        bookmarks.value = newList.map(b =>
+          b.id === movedItem.id ? { ...b, sort_order: newSortOrder } : b
+        )
+      }
+    } catch (e) {
+      console.error('Failed to reorder bookmarks:', e)
+      bookmarks.value = snapshot
+      toast.add({
+        title: 'エラー',
+        description: '並び替えに失敗しました',
+        color: 'error'
+      })
+    } finally {
+      isReordering.value = false
+    }
+  }
+
   return {
     addBookmark,
     updateBookmark,
-    deleteBookmark
+    deleteBookmark,
+    isReordering: readonly(isReordering),
+    reorderBookmarks
   }
 }

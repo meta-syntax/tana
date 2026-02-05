@@ -17,6 +17,7 @@ const emit = defineEmits<{
 }>()
 
 const sortOptions: SelectItem[] = [
+  { label: 'カスタム順', value: 'sort_order-asc' },
   { label: '新しい順', value: 'created_at-desc' },
   { label: '古い順', value: 'created_at-asc' },
   { label: 'タイトル A→Z', value: 'title-asc' },
