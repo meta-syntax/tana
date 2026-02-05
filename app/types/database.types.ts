@@ -80,6 +80,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           id: string
+          rss_feed_id: string | null
           sort_order: number
           thumbnail_url: string | null
           title: string | null
@@ -91,6 +92,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          rss_feed_id?: string | null
           sort_order?: number
           thumbnail_url?: string | null
           title?: string | null
@@ -102,12 +104,66 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          rss_feed_id?: string | null
           sort_order?: number
           thumbnail_url?: string | null
           title?: string | null
           updated_at?: string | null
           url?: string
           user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookmarks_rss_feed_id_fkey"
+            columns: ["rss_feed_id"]
+            isOneToOne: false
+            referencedRelation: "rss_feeds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rss_feeds: {
+        Row: {
+          id: string
+          user_id: string
+          url: string
+          title: string | null
+          description: string | null
+          site_url: string | null
+          last_fetched_at: string | null
+          last_error: string | null
+          error_count: number
+          is_active: boolean
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          url: string
+          title?: string | null
+          description?: string | null
+          site_url?: string | null
+          last_fetched_at?: string | null
+          last_error?: string | null
+          error_count?: number
+          is_active?: boolean
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          url?: string
+          title?: string | null
+          description?: string | null
+          site_url?: string | null
+          last_fetched_at?: string | null
+          last_error?: string | null
+          error_count?: number
+          is_active?: boolean
+          created_at?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }

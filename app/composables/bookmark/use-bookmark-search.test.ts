@@ -10,6 +10,7 @@ const createMockBookmark = (id: string): Bookmark => ({
   title: `Bookmark ${id}`,
   description: null,
   thumbnail_url: null,
+  rss_feed_id: null,
   sort_order: 1000,
   created_at: '2025-01-01T00:00:00Z',
   updated_at: '2025-01-01T00:00:00Z'

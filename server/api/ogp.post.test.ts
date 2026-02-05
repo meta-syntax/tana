@@ -23,6 +23,52 @@ vi.mock('node:dns/promises', () => ({
   resolve: (...args: unknown[]) => mockDnsResolve(...args)
 }))
 
+// SSRF utils のモック（Nitro auto-import: server/utils/ssrf.tsから自動インポート）
+const mockValidateHost = vi.fn(async (hostname: string) => {
+  if (hostname === 'localhost' || hostname === '0.0.0.0') {
+    throw mockCreateError({
+      statusCode: 400,
+      statusMessage: 'Access to internal hosts is not allowed'
+    })
+  }
+  const PRIVATE_IP_PATTERNS = [
+    /^127\./, /^10\./, /^172\.(1[6-9]|2\d|3[01])\./, /^192\.168\./,
+    /^169\.254\./, /^0\./, /^::1$/, /^fe80:/i, /^fc00:/i, /^fd[0-9a-f]{2}:/i
+  ]
+  const checkPrivateIp = (ip: string) => PRIVATE_IP_PATTERNS.some(p => p.test(ip))
+
+  if (/^[\d.]+$/.test(hostname) || hostname.includes(':')) {
+    if (checkPrivateIp(hostname)) {
+      throw mockCreateError({
+        statusCode: 400,
+        statusMessage: 'Access to internal hosts is not allowed'
+      })
+    }
+    return
+  }
+
+  try {
+    const addresses = await mockDnsResolve(hostname)
+    for (const addr of addresses) {
+      if (checkPrivateIp(addr)) {
+        throw mockCreateError({
+          statusCode: 400,
+          statusMessage: 'Access to internal hosts is not allowed'
+        })
+      }
+    }
+  } catch (error) {
+    if (error && typeof error === 'object' && 'statusCode' in error) {
+      throw error
+    }
+    throw mockCreateError({
+      statusCode: 400,
+      statusMessage: 'Failed to resolve hostname'
+    })
+  }
+})
+vi.stubGlobal('validateHost', mockValidateHost)
+
 // metascraperのモック
 const mockScraper = vi.fn()
 vi.mock('metascraper', () => ({

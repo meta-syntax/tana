@@ -1,7 +1,4 @@
-export default defineNuxtRouteMiddleware(() => {
-  const session = useSupabaseSession()
-
-  if (session.value) {
-    return navigateTo('/dashboard')
-  }
+export default defineNuxtRouteMiddleware(async () => {
+  const hasSession = await useSessionVerify()
+  if (hasSession) return navigateTo('/dashboard')
 })

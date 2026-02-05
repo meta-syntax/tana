@@ -43,6 +43,7 @@ export const useBookmarkMutations = (options: UseBookmarkMutationsOptions) => {
       title: input.title || null,
       description: input.description || null,
       thumbnail_url: input.thumbnail_url || null,
+      rss_feed_id: null,
       sort_order: 0,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()

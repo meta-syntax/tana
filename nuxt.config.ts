@@ -17,6 +17,7 @@ export default defineNuxtConfig({
       'composables/bookmark',
       'composables/auth',
       'composables/tag',
+      'composables/feed',
       'composables/ui'
     ]
   },
