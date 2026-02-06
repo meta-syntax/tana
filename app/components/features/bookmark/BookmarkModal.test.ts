@@ -242,9 +242,11 @@ describe('BookmarkModal', () => {
     expect(document.body.textContent).toContain('タグ')
   })
 
-  it('create-tagイベントが伝播する', async () => {
+  it('TagSelectのcreate-tagでonCreateTagコールバックが呼ばれる', async () => {
+    const onCreateTag = vi.fn().mockResolvedValue({ id: 'new-tag-1', user_id: 'u1', name: 'NewTag', color: '#3b82f6', created_at: '', updated_at: '' })
+
     wrapper = await mountSuspended(BookmarkModal, {
-      props: { 'open': true, 'onUpdate:open': vi.fn(), 'tags': [] },
+      props: { 'open': true, 'onUpdate:open': vi.fn(), 'tags': [], onCreateTag },
       attachTo: document.body
     })
 
@@ -254,9 +256,7 @@ describe('BookmarkModal', () => {
       tagSelect.vm.$emit('create-tag', { name: 'NewTag', color: '#3b82f6' })
       await wrapper.vm.$nextTick()
 
-      const events = wrapper.emitted('create-tag')
-      expect(events).toBeTruthy()
-      expect(events![0]![0]).toEqual({ name: 'NewTag', color: '#3b82f6' })
+      expect(onCreateTag).toHaveBeenCalledWith({ name: 'NewTag', color: '#3b82f6' })
     }
   })
 
