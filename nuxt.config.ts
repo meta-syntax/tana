@@ -50,7 +50,8 @@ export default defineNuxtConfig({
       ? {}
       : {
           routes: ['/'],
-          crawlLinks: true
+          crawlLinks: true,
+          ignore: ['/dashboard']
         },
     routeRules: {
       '/**': {

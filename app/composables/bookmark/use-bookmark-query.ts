@@ -101,8 +101,8 @@ export const useBookmarkQuery = (options: UseBookmarkQueryOptions) => {
   })
   const totalCount = computed(() => bookmarkData.value.total)
 
-  // ローディング状態（認証未確定時も loading として扱い、空データの一瞬表示を防ぐ）
-  const loading = computed(() => status.value === 'pending' || !user.value?.sub)
+  // ローディング状態
+  const loading = computed(() => status.value === 'pending')
 
   // 統計情報（軽量取得）
   const { data: stats, refresh: refreshStats } = useLazyAsyncData(
