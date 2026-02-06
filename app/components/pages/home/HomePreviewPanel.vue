@@ -1,32 +1,62 @@
 <script setup lang="ts">
-const previewItems = [
+interface PreviewTag {
+  name: string
+  color: string
+}
+
+interface PreviewItem {
+  title: string
+  description: string
+  domain: string
+  time: string
+  thumbnail: string
+  tags: PreviewTag[]
+  summary?: string
+}
+
+const previewItems: PreviewItem[] = [
   {
     title: 'Nuxt 4 移行ガイド - 公式ドキュメント',
     description: 'Nuxt 3からNuxt 4への移行手順を解説します',
     domain: 'nuxt.com',
     time: '3分前',
-    thumbnail: 'https://nuxt.com/new-social.jpg'
+    thumbnail: 'https://nuxt.com/new-social.jpg',
+    tags: [
+      { name: 'フロントエンド', color: '#3b82f6' },
+      { name: 'マイグレーション', color: '#ef4444' }
+    ],
+    summary: 'Nuxt 4はapp/ディレクトリ構造の標準化、TypeScript統合の強化、パフォーマンス改善が主な変更点。既存プロジェクトは互換性レイヤーで段階移行可能。'
   },
   {
     title: 'Tailwind CSS v4 の新機能まとめ',
     description: 'パフォーマンス改善と新ユーティリティを紹介',
     domain: 'tailwindcss.com',
     time: '1時間前',
-    thumbnail: 'https://tailwindcss.com/opengraph-image.jpg'
+    thumbnail: 'https://tailwindcss.com/opengraph-image.jpg',
+    tags: [
+      { name: 'CSS', color: '#8b5cf6' },
+      { name: 'フロントエンド', color: '#3b82f6' }
+    ]
   },
   {
     title: 'Vite 6 ビルドツールの進化',
     description: '次世代フロントエンドツールの最新アップデート',
     domain: 'vite.dev',
     time: '3時間前',
-    thumbnail: 'https://vite.dev/og-image.jpg'
+    thumbnail: 'https://vite.dev/og-image.jpg',
+    tags: [
+      { name: 'ツール', color: '#10b981' }
+    ]
   },
   {
     title: 'Supabase で始めるリアルタイムアプリ開発',
     description: 'PostgreSQLベースのBaaSで高速プロトタイピング',
     domain: 'supabase.com',
     time: '昨日',
-    thumbnail: 'https://supabase.com/images/og/supabase-og.png'
+    thumbnail: 'https://supabase.com/images/og/supabase-og.png',
+    tags: [
+      { name: 'BaaS', color: '#f59e0b' }
+    ]
   }
 ]
 </script>
@@ -63,10 +93,38 @@ const previewItems = [
             >
           </div>
           <div class="p-3">
+            <!-- タグバッジ -->
+            <div class="mb-1.5 flex flex-wrap gap-1">
+              <span
+                v-for="tag in item.tags"
+                :key="tag.name"
+                class="inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-medium"
+                :style="{
+                  backgroundColor: `${tag.color}20`,
+                  color: tag.color
+                }"
+              >
+                {{ tag.name }}
+              </span>
+            </div>
             <p class="line-clamp-1 text-sm font-medium text-white">
               {{ item.title }}
             </p>
-            <p class="mt-1 line-clamp-1 text-xs text-white/50">
+            <!-- AI要約 -->
+            <p
+              v-if="item.summary"
+              class="mt-1 line-clamp-2 text-[10px] leading-relaxed text-[#fdba74]/80"
+            >
+              <UIcon
+                name="i-heroicons-sparkles"
+                class="mr-0.5 inline-block size-2.5 align-text-top"
+              />
+              {{ item.summary }}
+            </p>
+            <p
+              v-else
+              class="mt-1 line-clamp-1 text-xs text-white/50"
+            >
               {{ item.description }}
             </p>
             <div class="mt-2 flex items-center justify-between text-[10px] text-white/40">
