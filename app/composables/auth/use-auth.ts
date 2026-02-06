@@ -38,8 +38,15 @@ export const useAuth = () => {
     loading.value = true
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) throw error
+
+      // onAuthStateChange の発火前に navigateTo すると、
+      // session/user が null のまま auth ミドルウェアが実行される競合が発生する。
+      // 手動で useState を同期してから遷移する。
+      useSupabaseSession().value = data.session
+      const { data: claimsData } = await supabase.auth.getClaims()
+      useSupabaseUser().value = claimsData?.claims ?? null
 
       await navigateTo('/dashboard')
     } catch (error) {
@@ -57,6 +64,8 @@ export const useAuth = () => {
 
   const signOut = async () => {
     await supabase.auth.signOut()
+    useSupabaseSession().value = null
+    useSupabaseUser().value = null
     await navigateTo('/login')
   }
 
