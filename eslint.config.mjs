@@ -18,6 +18,12 @@ export default withNuxt(
     }
   },
   {
+    files: ['**/*.vue'],
+    rules: {
+      'no-unused-vars': 'off'
+    }
+  },
+  {
     files: ['**/*.test.ts'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',

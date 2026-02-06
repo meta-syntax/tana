@@ -11,6 +11,9 @@ export type { Tag, TagInput, TagRowWithCountJoin, TagWithCount } from './tag'
 // Feed types
 export type { RssFeed, RssFeedInput, FeedStatus } from './feed'
 
+// AI types
+export type { TagSuggestion, SuggestTagsResponse, SummarizeResponse } from './ai'
+
 // OGP types
 export interface OgpData {
   title: string | null

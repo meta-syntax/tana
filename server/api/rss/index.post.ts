@@ -1,9 +1,9 @@
 import { serverSupabaseClient } from '#supabase/server'
-import type { Database } from '~/types'
+import type { Database, RssFeedRow } from '~/types'
 
 const MAX_FEEDS_PER_USER = 50
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<RssFeedRow> => {
   const userId = await requireAuth(event)
 
   const body = await readBody<{ url: string }>(event)

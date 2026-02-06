@@ -39,7 +39,7 @@ const checkRateLimit = (ip: string): boolean => {
   return true
 }
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<{ title: string | null, description: string | null, image: string | null }> => {
   // レート制限チェック
   const clientIp = getRequestIP(event, { xForwardedFor: true }) ?? 'unknown'
   if (!checkRateLimit(clientIp)) {

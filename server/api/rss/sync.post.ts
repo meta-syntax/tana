@@ -3,7 +3,7 @@ import type { Database, RssFeedRow } from '~/types'
 
 const BATCH_SIZE = 5
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<{ synced: number, errors: number }> => {
   // CRON_SECRET認証
   const cronSecret = process.env.CRON_SECRET
   const authHeader = getHeader(event, 'authorization')

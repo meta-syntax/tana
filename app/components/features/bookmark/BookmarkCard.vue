@@ -28,6 +28,25 @@ const { relativeTime, updateRelativeTime } = useRelativeTime(
 
 onMounted(updateRelativeTime)
 
+// AI要約
+const { loading: aiSummarizeLoading, error: aiSummarizeError, summarize } = useAiSummarize()
+const localSummary = ref<string | null>(props.bookmark.summary ?? null)
+const isSummaryExpanded = ref(false)
+
+watch(() => props.bookmark.summary, (newSummary) => {
+  if (newSummary) {
+    localSummary.value = newSummary
+  }
+})
+
+const handleSummarize = async () => {
+  const result = await summarize(props.bookmark.id, props.bookmark.url)
+  if (result) {
+    localSummary.value = result
+    isSummaryExpanded.value = true
+  }
+}
+
 // 削除モーダル
 const isDeleteModalOpen = ref(false)
 
@@ -107,6 +126,103 @@ const {
         <p class="line-clamp-2 text-sm text-muted">
           {{ bookmark.description }}
         </p>
+      </div>
+
+      <!-- AI要約: large -->
+      <div
+        v-if="cardSize === 'large'"
+        class="mt-2"
+        @click.prevent
+      >
+        <template v-if="localSummary">
+          <button
+            class="flex items-center gap-1 text-xs text-muted hover:text-highlighted transition-colors"
+            @click="isSummaryExpanded = !isSummaryExpanded"
+          >
+            <UIcon
+              name="i-heroicons-sparkles"
+              class="size-3"
+            />
+            <span>AI要約</span>
+            <UIcon
+              :name="isSummaryExpanded ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
+              class="size-3"
+            />
+          </button>
+          <p
+            v-if="isSummaryExpanded"
+            class="mt-1 text-xs text-muted leading-relaxed"
+          >
+            {{ localSummary }}
+          </p>
+        </template>
+        <template v-else>
+          <UButton
+            size="xs"
+            variant="ghost"
+            icon="i-heroicons-sparkles"
+            :loading="aiSummarizeLoading"
+            @click="handleSummarize"
+          >
+            AIで要約
+          </UButton>
+          <span
+            v-if="aiSummarizeError"
+            class="ml-1 text-xs text-red-500"
+          >
+            {{ aiSummarizeError }}
+          </span>
+        </template>
+      </div>
+
+      <!-- AI要約: medium -->
+      <div
+        v-else-if="cardSize === 'medium'"
+        class="mt-1.5"
+        @click.prevent
+      >
+        <template v-if="localSummary">
+          <UTooltip :text="localSummary">
+            <p class="flex items-center gap-1 text-xs text-muted">
+              <UIcon
+                name="i-heroicons-sparkles"
+                class="size-3 shrink-0"
+              />
+              <span class="line-clamp-1">{{ localSummary }}</span>
+            </p>
+          </UTooltip>
+        </template>
+        <template v-else>
+          <UButton
+            size="xs"
+            variant="ghost"
+            icon="i-heroicons-sparkles"
+            :loading="aiSummarizeLoading"
+            @click="handleSummarize"
+          >
+            AIで要約
+          </UButton>
+          <span
+            v-if="aiSummarizeError"
+            class="ml-1 text-xs text-red-500"
+          >
+            {{ aiSummarizeError }}
+          </span>
+        </template>
+      </div>
+
+      <!-- AI要約: small（要約済みのみ表示） -->
+      <div
+        v-else-if="cardSize === 'small' && localSummary"
+        class="mt-1"
+        @click.prevent
+      >
+        <UTooltip :text="localSummary">
+          <UIcon
+            name="i-heroicons-sparkles"
+            class="size-3.5 text-muted hover:text-highlighted transition-colors"
+          />
+        </UTooltip>
       </div>
 
       <BookmarkMeta

@@ -16,9 +16,13 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "db:types": "supabase gen types typescript --linked > app/types/database.types.ts",
-    "db:seed": "npx tsx --env-file=.env scripts/seed.ts"
+    "db:seed": "npx tsx --env-file=.env scripts/seed.ts",
+    "db:push": "supabase db push --linked",
+    "db:migrate:new": "supabase migration new",
+    "db:migrate:list": "supabase migration list"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.73.0",
     "@fontsource/zen-kaku-gothic-new": "^5.2.7",
     "@nuxt/eslint": "^1.13.0",
     "@nuxt/ui": "^4.4.0",
