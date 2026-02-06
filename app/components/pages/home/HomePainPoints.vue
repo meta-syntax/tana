@@ -11,13 +11,13 @@ const painPoints = [
     description: 'タブを開きっぱなし、メモに貼りっぱなし。結局読まないまま忘れてしまう。'
   },
   {
-    icon: 'i-heroicons-users',
-    title: 'どのアカウントに保存したっけ？',
-    description: '仕事用、私用、ブラウザごと。アカウントが分散して、どこに何を保存したか迷子になる。'
+    icon: 'i-heroicons-tag',
+    title: '整理が面倒で放置してしまう',
+    description: 'フォルダ分けやタグ付けは手間がかかる。気づけば「未分類」が山積みに。'
   },
   {
     icon: 'i-heroicons-question-mark-circle',
-    title: '開いてみるまで中身が分からない',
+    title: '開いてみるまで中身がわからない',
     description: 'タイトルだけのブックマーク一覧。一つずつ開かないと何のページだったか思い出せない。'
   }
 ]

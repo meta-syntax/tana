@@ -8,7 +8,7 @@ const runtimeConfig = useRuntimeConfig()
 useSeoMeta({
   title: 'Tana - ブックマークを、いつでも取り出せる資産に。',
   ogTitle: 'Tana - ブックマークを、いつでも取り出せる資産に。',
-  ogDescription: '個人向けブックマーク管理Webアプリ。URLの保存・編集・削除に加え、OGP自動取得とサムネイル表示で、見返しやすいコレクションを作れます。',
+  ogDescription: 'AI搭載の個人向けブックマーク管理アプリ。OGP自動取得、AIによるページ要約・タグ提案、RSSフィード自動収集で、ブックマークを「使える資産」に。',
   ogUrl: runtimeConfig.public.siteUrl
 })
 

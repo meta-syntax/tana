@@ -1,24 +1,40 @@
 <script setup lang="ts">
-const steps = [
+const features = [
   {
-    step: '1',
-    title: 'URLを貼るだけ',
-    description: '保存したいページのURLを入力するだけ。それだけで準備完了。'
+    icon: 'i-heroicons-link',
+    title: 'OGP自動取得',
+    description: 'URLを貼るだけでタイトル・説明・サムネイルを自動取得。手入力ゼロで見やすいカードが完成。',
+    accent: false
   },
   {
-    step: '2',
-    title: 'タイトルと画像を自動取得',
-    description: 'OGP情報を自動で取得。サムネイル付きで何のページか一目瞭然。'
+    icon: 'i-heroicons-sparkles',
+    title: 'AIがページを要約',
+    description: 'ブックマークのページ内容をAIが2〜3文で要約。リンクを開かなくても内容を把握できる。',
+    accent: true
   },
   {
-    step: '3',
-    title: '自分だけのメモを残せる',
-    description: '「なぜ保存したか」「どう使うか」を自分の言葉で書き添えられる。'
+    icon: 'i-heroicons-tag',
+    title: 'AIタグ提案',
+    description: 'ページの内容を分析してタグを自動提案。既存タグを優先的に再利用するから、タグが散らからない。',
+    accent: true
   },
   {
-    step: '4',
-    title: 'いつでもどこでもアクセス',
-    description: 'PC・スマホ・タブレット。ブラウザでどの端末からでも自分の棚にアクセスできる。'
+    icon: 'i-heroicons-swatch',
+    title: 'カラータグで整理',
+    description: '10色のカラータグで直感的に分類。複数タグでフィルタリングして、必要な情報にすぐアクセス。',
+    accent: false
+  },
+  {
+    icon: 'i-heroicons-rss',
+    title: 'RSSフィードで自動収集',
+    description: 'お気に入りサイトのRSSを登録すれば、新着記事を自動でブックマークに追加。情報収集を自動化。',
+    accent: false
+  },
+  {
+    icon: 'i-heroicons-arrows-up-down',
+    title: 'ドラッグ&ドロップで並び替え',
+    description: '好きな順番に自由に並び替え。優先度の高いものを上に、あとで読むものは下に。',
+    accent: false
   }
 ]
 </script>
@@ -30,27 +46,36 @@ const steps = [
         Tanaなら、こう変わる
       </h2>
       <p class="text-white/60">
-        シンプルだから続けられる
+        AIとスマートな整理機能で、ブックマークが「使える資産」に
       </p>
     </div>
-    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-      <div
-        v-for="item in steps"
-        :key="item.step"
-        class="space-y-3"
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <UCard
+        v-for="feature in features"
+        :key="feature.title"
+        :class="[
+          'ring-1',
+          feature.accent
+            ? 'bg-[#f97316]/5 ring-[#f97316]/25'
+            : 'bg-white/5 ring-white/10'
+        ]"
       >
-        <div
-          class="flex size-10 items-center justify-center rounded-full bg-(--tana-accent) text-lg font-bold text-[#111]"
-        >
-          {{ item.step }}
+        <div class="space-y-3">
+          <UIcon
+            :name="feature.icon"
+            :class="[
+              'size-8',
+              feature.accent ? 'text-(--tana-accent)' : 'text-white/70'
+            ]"
+          />
+          <p class="text-lg font-semibold">
+            {{ feature.title }}
+          </p>
+          <p class="text-sm text-white/60">
+            {{ feature.description }}
+          </p>
         </div>
-        <p class="text-lg font-semibold">
-          {{ item.title }}
-        </p>
-        <p class="text-sm text-white/60">
-          {{ item.description }}
-        </p>
-      </div>
+      </UCard>
     </div>
   </section>
 </template>
