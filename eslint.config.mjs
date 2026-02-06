@@ -16,5 +16,12 @@ export default withNuxt(
     rules: {
       'no-undef': 'off'
     }
+  },
+  {
+    files: ['**/*.test.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off'
+    }
   }
 )

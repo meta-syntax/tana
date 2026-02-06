@@ -1,16 +1,10 @@
-import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { serverSupabaseClient } from '#supabase/server'
 import type { Database } from '~/types'
 
 export default defineEventHandler(async (event) => {
-  const user = await serverSupabaseUser(event)
-  if (!user?.sub) {
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
-  }
+  const userId = await requireAuth(event)
 
-  const id = getRouterParam(event, 'id')
-  if (!id) {
-    throw createError({ statusCode: 400, statusMessage: 'Feed ID is required' })
-  }
+  const id = requireRouteParam(event, 'id')
 
   const client = await serverSupabaseClient<Database>(event)
 
@@ -19,7 +13,7 @@ export default defineEventHandler(async (event) => {
     .from('rss_feeds')
     .select('id, is_active, error_count, last_error')
     .eq('id', id)
-    .eq('user_id', user.sub)
+    .eq('user_id', userId)
     .single()
 
   if (feedError || !feed) {

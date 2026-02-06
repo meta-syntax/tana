@@ -1,13 +1,10 @@
-import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
+import { serverSupabaseClient } from '#supabase/server'
 import type { Database } from '~/types'
 
 const MAX_FEEDS_PER_USER = 50
 
 export default defineEventHandler(async (event) => {
-  const user = await serverSupabaseUser(event)
-  if (!user?.sub) {
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
-  }
+  const userId = await requireAuth(event)
 
   const body = await readBody<{ url: string }>(event)
   if (!body?.url?.trim()) {
@@ -34,7 +31,7 @@ export default defineEventHandler(async (event) => {
   const { count, error: countError } = await client
     .from('rss_feeds')
     .select('*', { count: 'exact', head: true })
-    .eq('user_id', user.sub)
+    .eq('user_id', userId)
 
   if (countError) {
     throw createError({ statusCode: 500, statusMessage: 'Failed to check feed count' })
@@ -51,7 +48,7 @@ export default defineEventHandler(async (event) => {
   const { data, error: insertError } = await client
     .from('rss_feeds')
     .insert({
-      user_id: user.sub,
+      user_id: userId,
       url: body.url.trim(),
       title: feed.title,
       description: feed.description,

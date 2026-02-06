@@ -16,57 +16,8 @@ vi.stubGlobal('getRequestIP', mockGetRequestIP)
 vi.stubGlobal('readBody', mockReadBody)
 vi.stubGlobal('createError', mockCreateError)
 
-// DNS解決のモック
-const mockDnsResolve = vi.fn()
-vi.mock('node:dns/promises', () => ({
-  default: { resolve: (...args: unknown[]) => mockDnsResolve(...args) },
-  resolve: (...args: unknown[]) => mockDnsResolve(...args)
-}))
-
-// SSRF utils のモック（Nitro auto-import: server/utils/ssrf.tsから自動インポート）
-const mockValidateHost = vi.fn(async (hostname: string) => {
-  if (hostname === 'localhost' || hostname === '0.0.0.0') {
-    throw mockCreateError({
-      statusCode: 400,
-      statusMessage: 'Access to internal hosts is not allowed'
-    })
-  }
-  const PRIVATE_IP_PATTERNS = [
-    /^127\./, /^10\./, /^172\.(1[6-9]|2\d|3[01])\./, /^192\.168\./,
-    /^169\.254\./, /^0\./, /^::1$/, /^fe80:/i, /^fc00:/i, /^fd[0-9a-f]{2}:/i
-  ]
-  const checkPrivateIp = (ip: string) => PRIVATE_IP_PATTERNS.some(p => p.test(ip))
-
-  if (/^[\d.]+$/.test(hostname) || hostname.includes(':')) {
-    if (checkPrivateIp(hostname)) {
-      throw mockCreateError({
-        statusCode: 400,
-        statusMessage: 'Access to internal hosts is not allowed'
-      })
-    }
-    return
-  }
-
-  try {
-    const addresses = await mockDnsResolve(hostname)
-    for (const addr of addresses) {
-      if (checkPrivateIp(addr)) {
-        throw mockCreateError({
-          statusCode: 400,
-          statusMessage: 'Access to internal hosts is not allowed'
-        })
-      }
-    }
-  } catch (error) {
-    if (error && typeof error === 'object' && 'statusCode' in error) {
-      throw error
-    }
-    throw mockCreateError({
-      statusCode: 400,
-      statusMessage: 'Failed to resolve hostname'
-    })
-  }
-})
+// SSRF utils のモック（詳細テストは ssrf.test.ts で実施）
+const mockValidateHost = vi.fn()
 vi.stubGlobal('validateHost', mockValidateHost)
 
 // metascraperのモック
@@ -95,11 +46,12 @@ describe('OGP API ハンドラ', () => {
     // IPをテストごとにユニークにしてレート制限を回避
     mockGetRequestIP.mockReturnValue(`test-${urlCounter}-${Date.now()}`)
     mockReadBody.mockReset()
-    mockDnsResolve.mockReset()
+    mockValidateHost.mockReset()
+    mockValidateHost.mockResolvedValue(undefined)
     mockScraper.mockReset()
     mockFetch.mockReset()
 
-    const mod = await import('./ogp.post')
+    const mod = await import('./index.post')
     handler = mod.default as (event: unknown) => Promise<unknown>
   })
 
@@ -132,60 +84,32 @@ describe('OGP API ハンドラ', () => {
     })
   })
 
-  describe('SSRF対策', () => {
-    it('localhost の場合 400 を返す', async () => {
-      mockReadBody.mockResolvedValue({ url: 'http://localhost/admin' })
+  describe('SSRF対策の呼び出し', () => {
+    it('validateHostが呼ばれる', async () => {
+      const url = uniqueUrl()
+      mockReadBody.mockResolvedValue({ url })
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        headers: new Headers(),
+        text: () => Promise.resolve('<html></html>')
+      })
+      mockScraper.mockResolvedValue({ title: null, description: null, image: null })
+
+      await handler(createMockEvent())
+
+      expect(mockValidateHost).toHaveBeenCalledWith(new URL(url).hostname)
+    })
+
+    it('validateHostが失敗した場合エラーが伝播する', async () => {
+      mockReadBody.mockResolvedValue({ url: uniqueUrl() })
+      mockValidateHost.mockRejectedValue(
+        mockCreateError({ statusCode: 400, statusMessage: 'Access to internal hosts is not allowed' })
+      )
 
       expect(handler(createMockEvent())).rejects.toMatchObject({
         statusCode: 400,
         statusMessage: 'Access to internal hosts is not allowed'
-      })
-    })
-
-    it('プライベートIP (10.x) の場合 400 を返す', async () => {
-      mockReadBody.mockResolvedValue({ url: 'http://10.0.0.1/internal' })
-
-      expect(handler(createMockEvent())).rejects.toMatchObject({
-        statusCode: 400,
-        statusMessage: 'Access to internal hosts is not allowed'
-      })
-    })
-
-    it('プライベートIP (192.168.x) の場合 400 を返す', async () => {
-      mockReadBody.mockResolvedValue({ url: 'http://192.168.1.1/internal' })
-
-      expect(handler(createMockEvent())).rejects.toMatchObject({
-        statusCode: 400,
-        statusMessage: 'Access to internal hosts is not allowed'
-      })
-    })
-
-    it('プライベートIP (172.16.x) の場合 400 を返す', async () => {
-      mockReadBody.mockResolvedValue({ url: 'http://172.16.0.1/internal' })
-
-      expect(handler(createMockEvent())).rejects.toMatchObject({
-        statusCode: 400,
-        statusMessage: 'Access to internal hosts is not allowed'
-      })
-    })
-
-    it('DNS解決結果がプライベートIPの場合 400 を返す', async () => {
-      mockReadBody.mockResolvedValue({ url: uniqueUrl('https://evil.example.com') })
-      mockDnsResolve.mockResolvedValue(['192.168.0.1'])
-
-      expect(handler(createMockEvent())).rejects.toMatchObject({
-        statusCode: 400,
-        statusMessage: 'Access to internal hosts is not allowed'
-      })
-    })
-
-    it('DNS解決失敗の場合 400 を返す', async () => {
-      mockReadBody.mockResolvedValue({ url: uniqueUrl('https://nonexistent.example.com') })
-      mockDnsResolve.mockRejectedValue(new Error('ENOTFOUND'))
-
-      expect(handler(createMockEvent())).rejects.toMatchObject({
-        statusCode: 400,
-        statusMessage: 'Failed to resolve hostname'
       })
     })
   })
@@ -194,7 +118,6 @@ describe('OGP API ハンドラ', () => {
     it('制限内のリクエストは正常に処理される', async () => {
       const url = uniqueUrl()
       mockReadBody.mockResolvedValue({ url })
-      mockDnsResolve.mockResolvedValue(['93.184.216.34'])
       mockFetch.mockResolvedValue({
         ok: true,
         status: 200,
@@ -211,7 +134,6 @@ describe('OGP API ハンドラ', () => {
       // 固定IPを使ってレート制限をテスト
       const rateLimitIp = `rate-limit-test-${Date.now()}`
       mockGetRequestIP.mockReturnValue(rateLimitIp)
-      mockDnsResolve.mockResolvedValue(['93.184.216.34'])
       mockFetch.mockResolvedValue({
         ok: true,
         status: 200,
@@ -238,7 +160,6 @@ describe('OGP API ハンドラ', () => {
   describe('リダイレクト処理', () => {
     it('リダイレクトレスポンスの場合 502 を返す', async () => {
       mockReadBody.mockResolvedValue({ url: uniqueUrl() })
-      mockDnsResolve.mockResolvedValue(['93.184.216.34'])
       mockFetch.mockResolvedValue({
         ok: false,
         status: 301,
@@ -257,7 +178,6 @@ describe('OGP API ハンドラ', () => {
     it('同一URL2回目の呼び出しではfetchは1回だけ呼ばれる', async () => {
       const cachedUrl = uniqueUrl('https://cached-example.com')
       mockReadBody.mockResolvedValue({ url: cachedUrl })
-      mockDnsResolve.mockResolvedValue(['93.184.216.34'])
       mockFetch.mockResolvedValue({
         ok: true,
         status: 200,
@@ -282,7 +202,6 @@ describe('OGP API ハンドラ', () => {
   describe('成功パス', () => {
     it('有効なURLの場合 OGPデータを返す', async () => {
       mockReadBody.mockResolvedValue({ url: uniqueUrl('https://example.com') })
-      mockDnsResolve.mockResolvedValue(['93.184.216.34'])
       mockFetch.mockResolvedValue({
         ok: true,
         status: 200,
@@ -307,7 +226,6 @@ describe('OGP API ハンドラ', () => {
   describe('エラーハンドリング', () => {
     it('fetch先がエラーステータスの場合 502 を返す', async () => {
       mockReadBody.mockResolvedValue({ url: uniqueUrl('https://example.com') })
-      mockDnsResolve.mockResolvedValue(['93.184.216.34'])
       mockFetch.mockResolvedValue({
         ok: false,
         status: 404,
@@ -323,7 +241,6 @@ describe('OGP API ハンドラ', () => {
 
     it('タイムアウトの場合 504 を返す', async () => {
       mockReadBody.mockResolvedValue({ url: uniqueUrl('https://slow-example.com') })
-      mockDnsResolve.mockResolvedValue(['93.184.216.34'])
 
       const timeoutError = new Error('The operation was aborted due to timeout')
       timeoutError.name = 'TimeoutError'
