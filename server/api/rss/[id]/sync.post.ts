@@ -1,7 +1,7 @@
 import { serverSupabaseClient } from '#supabase/server'
 import type { Database } from '~/types'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<{ success: true, newArticles: number }> => {
   const userId = await requireAuth(event)
 
   const id = requireRouteParam(event, 'id')

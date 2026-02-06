@@ -1,7 +1,7 @@
 import { serverSupabaseClient } from '#supabase/server'
-import type { Database } from '~/types'
+import type { Database, RssFeedRow } from '~/types'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<RssFeedRow[]> => {
   const userId = await requireAuth(event)
 
   const client = await serverSupabaseClient<Database>(event)

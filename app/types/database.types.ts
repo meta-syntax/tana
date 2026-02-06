@@ -82,6 +82,7 @@ export type Database = {
           id: string
           rss_feed_id: string | null
           sort_order: number
+          summary: string | null
           thumbnail_url: string | null
           title: string | null
           updated_at: string | null
@@ -94,6 +95,7 @@ export type Database = {
           id?: string
           rss_feed_id?: string | null
           sort_order?: number
+          summary?: string | null
           thumbnail_url?: string | null
           title?: string | null
           updated_at?: string | null
@@ -106,6 +108,7 @@ export type Database = {
           id?: string
           rss_feed_id?: string | null
           sort_order?: number
+          summary?: string | null
           thumbnail_url?: string | null
           title?: string | null
           updated_at?: string | null

@@ -195,8 +195,8 @@ const handleToggleFeedActive = (feed: RssFeed) => {
       v-model:open="isModalOpen"
       :bookmark="editingBookmark"
       :tags="tags ?? []"
+      :on-create-tag="handleCreateTagFromModal"
       @save="handleSave"
-      @create-tag="handleCreateTagFromModal"
     />
 
     <TagManageModal
