@@ -67,9 +67,11 @@ export const useBookmarkQuery = (options: UseBookmarkQueryOptions) => {
         query = query.or(`title.ilike.%${q}%,url.ilike.%${q}%,description.ilike.%${q}%`)
       }
 
-      // ソート（sort_orderは常にASC固定）
+      // ソート（sort_orderは常にASC固定、セカンダリソートで安定性を確保）
       if (sort.value.field === 'sort_order') {
-        query = query.order('sort_order', { ascending: true })
+        query = query
+          .order('sort_order', { ascending: true })
+          .order('created_at', { ascending: true })
       } else {
         query = query.order(sort.value.field, { ascending: sort.value.order === 'asc' })
       }

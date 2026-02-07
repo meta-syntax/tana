@@ -18,12 +18,16 @@ interface Props {
   tags?: TagWithCount[]
   isDragEnabled?: boolean
   isReordering?: boolean
+  isSelectionMode?: boolean
+  selectedIds?: Set<string>
 }
 
 const props = withDefaults(defineProps<Props>(), {
   tags: () => [],
   isDragEnabled: false,
-  isReordering: false
+  isReordering: false,
+  isSelectionMode: false,
+  selectedIds: () => new Set<string>()
 })
 
 const searchQuery = defineModel<string>('searchQuery', { default: '' })
@@ -37,6 +41,11 @@ const emit = defineEmits<{
   'update:sort': [sort: BookmarkSort]
   'manage-tags': []
   'reorder': [newList: Bookmark[], oldIndex: number, newIndex: number]
+  'toggle-select': [id: string]
+  'bulk-delete': []
+  'select-all': []
+  'exit-selection': []
+  'enter-selection': []
 }>()
 
 const {
@@ -45,9 +54,27 @@ const {
 } = useBookmarkSearch({
   bookmarks: toRef(props, 'bookmarks'),
   searchQuery,
+  selectedTagIds,
   totalCount: toRef(props, 'totalCount'),
   loading: toRef(props, 'loading')
 })
+
+// フィルター状態
+const hasActiveFilters = computed(() =>
+  searchQuery.value.trim() !== '' || selectedTagIds.value.length > 0
+)
+
+const clearAll = () => {
+  searchQuery.value = ''
+  selectedTagIds.value = []
+}
+
+// 選択モード時はドラッグ無効
+const effectiveDragEnabled = computed(() =>
+  props.isDragEnabled && !props.isSelectionMode
+)
+
+const selectedCount = computed(() => props.selectedIds.size)
 
 // ドラッグ用ローカルリスト
 const draggableList = ref<Bookmark[]>([])
@@ -82,8 +109,11 @@ const { skipTransition } = useTransitionControl({
 <template>
   <BookmarkListHeader
     :stats="props.stats"
+    :is-selection-mode="props.isSelectionMode"
     @add="emit('add')"
     @manage-tags="emit('manage-tags')"
+    @enter-selection="emit('enter-selection')"
+    @exit-selection="emit('exit-selection')"
   />
 
   <BookmarkSearchBar
@@ -91,14 +121,37 @@ const { skipTransition } = useTransitionControl({
     :is-searching="isSearching"
     :search-result-text="searchResultText"
     :sort="props.sort"
+    :has-active-filters="hasActiveFilters"
     @update:sort="emit('update:sort', $event)"
+    @clear-all="clearAll"
   />
 
-  <TagFilter
+  <div
     v-if="props.tags.length > 0"
-    v-model="selectedTagIds"
-    :tags="props.tags"
-  />
+    class="space-y-2"
+  >
+    <div
+      v-if="selectedTagIds.length > 0"
+      class="flex items-center gap-2"
+    >
+      <span class="text-sm font-medium text-highlighted">
+        {{ selectedTagIds.length }}件のタグで絞り込み中
+      </span>
+      <UButton
+        size="xs"
+        variant="soft"
+        color="neutral"
+        icon="i-heroicons-x-mark"
+        @click="selectedTagIds = []"
+      >
+        解除
+      </UButton>
+    </div>
+    <TagFilter
+      v-model="selectedTagIds"
+      :tags="props.tags"
+    />
+  </div>
 
   <BookmarkLoadingState
     v-if="displayState === 'initial-loading'"
@@ -110,11 +163,16 @@ const { skipTransition } = useTransitionControl({
     type="searching"
   />
 
+  <BookmarkLoadingState
+    v-else-if="displayState === 'filtering'"
+    type="filtering"
+  />
+
   <BookmarkEmptyState
     v-else-if="displayState === 'search-empty'"
     type="search"
     :search-query="lastAppliedQuery"
-    @clear-search="searchQuery = ''"
+    @clear-search="clearAll"
   />
 
   <BookmarkEmptyState
@@ -145,13 +203,13 @@ const { skipTransition } = useTransitionControl({
       </Transition>
 
       <VueDraggable
-        v-if="isDragEnabled"
+        v-if="effectiveDragEnabled"
         v-model="draggableList"
         :class="[gridClass, { 'pointer-events-none': isPageLoading || isReordering }]"
         handle=".drag-handle"
         :animation="200"
         easing="ease-out"
-        :delay="200"
+        :delay="150"
         :delay-on-touch-only="true"
         ghost-class="drag-ghost"
         chosen-class="drag-chosen"
@@ -164,8 +222,11 @@ const { skipTransition } = useTransitionControl({
           :bookmark="bookmark"
           :card-size="cardSize"
           :show-drag-handle="true"
+          :is-selection-mode="props.isSelectionMode"
+          :is-selected="props.selectedIds.has(bookmark.id)"
           @edit="emit('edit', $event)"
           @delete="emit('delete', $event)"
+          @toggle-select="emit('toggle-select', $event)"
         />
       </VueDraggable>
 
@@ -186,10 +247,13 @@ const { skipTransition } = useTransitionControl({
           :key="bookmark.id"
           :bookmark="bookmark"
           :card-size="cardSize"
+          :is-selection-mode="props.isSelectionMode"
+          :is-selected="props.selectedIds.has(bookmark.id)"
           :style="index < 9 ? { animationDelay: `${index * 50}ms` } : undefined"
           class="animate-fade-in"
           @edit="emit('edit', $event)"
           @delete="emit('delete', $event)"
+          @toggle-select="emit('toggle-select', $event)"
         />
       </TransitionGroup>
     </div>
@@ -208,5 +272,14 @@ const { skipTransition } = useTransitionControl({
         @update:page="emit('update:page', $event)"
       />
     </div>
+
+    <BookmarkBulkActionBar
+      v-if="props.isSelectionMode"
+      :selected-count="selectedCount"
+      :total-count="displayedBookmarks.length"
+      @select-all="emit('select-all')"
+      @delete="emit('bulk-delete')"
+      @cancel="emit('exit-selection')"
+    />
   </template>
 </template>

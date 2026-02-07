@@ -6,14 +6,18 @@ interface Props {
   isSearching: boolean
   searchResultText: string
   sort: BookmarkSort
+  hasActiveFilters?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  hasActiveFilters: false
+})
 
 const searchQuery = defineModel<string>({ required: true })
 
 const emit = defineEmits<{
   'update:sort': [sort: BookmarkSort]
+  'clear-all': []
 }>()
 
 const sortOptions: SelectItem[] = [
@@ -69,6 +73,20 @@ const perPageValue = computed({
               class="size-5 text-gray-400"
             />
           </div>
+        </template>
+        <template
+          v-if="props.hasActiveFilters"
+          #trailing
+        >
+          <UButton
+            color="neutral"
+            variant="link"
+            size="sm"
+            icon="i-heroicons-x-mark"
+            :padded="false"
+            aria-label="検索条件をクリア"
+            @click="emit('clear-all')"
+          />
         </template>
       </UInput>
 

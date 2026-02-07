@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Bookmark, TagInput, RssFeed } from '~/types'
+import type { Bookmark, TagInput } from '~/types'
 import type { TabsItem } from '@nuxt/ui'
 
 definePageMeta({
@@ -17,9 +17,22 @@ const {
   page, perPage, totalCount, sort, selectedTagIds,
   isDragEnabled, isReordering,
   search, changeSort, changePage, filterByTags,
-  refreshBookmarks, addBookmark, updateBookmark, deleteBookmark,
+  refreshBookmarks, addBookmark, updateBookmark, deleteBookmark, bulkDeleteBookmarks,
   reorderBookmarks
 } = useBookmarks()
+
+// 選択モード
+const {
+  selectedIds, isSelectionMode, selectedCount, hasSelection,
+  toggleSelection, selectAll, exitSelectionMode, enterSelectionMode
+} = useBookmarkSelection()
+
+// フィルタ/ページ変更時に選択をクリア
+watch([selectedTagIds, () => page.value], () => {
+  if (isSelectionMode.value) {
+    exitSelectionMode()
+  }
+})
 
 const {
   tags,
@@ -31,6 +44,17 @@ const {
   feeds, feedsLoading,
   addFeed, deleteFeed, syncFeed, toggleFeedActive
 } = useFeeds()
+
+// フィード管理モーダル
+const {
+  isAddModalOpen: isFeedAddModalOpen,
+  isDeleteModalOpen: isFeedDeleteModalOpen,
+  deletingFeed,
+  handleAddFeed, handleSyncFeed, handleConfirmDeleteFeed,
+  handleDeleteFeed, handleToggleFeedActive
+} = useFeedModal({
+  addFeed, deleteFeed, syncFeed, toggleFeedActive, refreshBookmarks
+})
 
 // タブ管理
 const activeTab = ref('bookmarks')
@@ -90,6 +114,28 @@ const handleDelete = async (bookmark: Bookmark) => {
   }
 }
 
+// 一括削除
+const isBulkDeleteModalOpen = ref(false)
+const bulkDeleting = ref(false)
+
+const handleBulkDelete = async () => {
+  if (bulkDeleting.value || !hasSelection.value) return
+
+  bulkDeleting.value = true
+  try {
+    const ids = Array.from(selectedIds.value)
+    await bulkDeleteBookmarks(ids)
+    isBulkDeleteModalOpen.value = false
+    exitSelectionMode()
+  } finally {
+    bulkDeleting.value = false
+  }
+}
+
+const handleSelectAll = () => {
+  selectAll(bookmarks.value.map(b => b.id))
+}
+
 // タグ管理モーダル
 const isTagManageModalOpen = ref(false)
 
@@ -102,43 +148,6 @@ const handleDeleteTag = async (id: string) => {
   await deleteTag(id)
   selectedTagIds.value = selectedTagIds.value.filter(tagId => tagId !== id)
   await refreshBookmarks()
-}
-
-// フィード管理
-const isFeedAddModalOpen = ref(false)
-const isFeedDeleteModalOpen = ref(false)
-const deletingFeed = ref<RssFeed | null>(null)
-
-const handleAddFeed = async (url: string) => {
-  const result = await addFeed({ url })
-  if (result) {
-    isFeedAddModalOpen.value = false
-  }
-}
-
-const handleSyncFeed = async (feed: RssFeed) => {
-  const success = await syncFeed(feed.id)
-  if (success) {
-    await refreshBookmarks()
-  }
-}
-
-const handleConfirmDeleteFeed = (feed: RssFeed) => {
-  deletingFeed.value = feed
-  isFeedDeleteModalOpen.value = true
-}
-
-const handleDeleteFeed = async () => {
-  if (!deletingFeed.value) return
-  const success = await deleteFeed(deletingFeed.value.id)
-  if (success) {
-    isFeedDeleteModalOpen.value = false
-    deletingFeed.value = null
-  }
-}
-
-const handleToggleFeedActive = (feed: RssFeed) => {
-  toggleFeedActive(feed)
 }
 </script>
 
@@ -164,6 +173,8 @@ const handleToggleFeedActive = (feed: RssFeed) => {
               :tags="tags ?? []"
               :is-drag-enabled="isDragEnabled"
               :is-reordering="isReordering"
+              :is-selection-mode="isSelectionMode"
+              :selected-ids="selectedIds"
               @add="openAddModal"
               @edit="openEditModal"
               @delete="handleDelete"
@@ -172,6 +183,11 @@ const handleToggleFeedActive = (feed: RssFeed) => {
               @update:selected-tag-ids="filterByTags"
               @manage-tags="isTagManageModalOpen = true"
               @reorder="handleReorder"
+              @enter-selection="enterSelectionMode"
+              @exit-selection="exitSelectionMode"
+              @toggle-select="toggleSelection"
+              @select-all="handleSelectAll"
+              @bulk-delete="isBulkDeleteModalOpen = true"
             />
           </div>
         </template>
@@ -205,6 +221,13 @@ const handleToggleFeedActive = (feed: RssFeed) => {
       @add="addTag"
       @update="handleUpdateTag"
       @delete="handleDeleteTag"
+    />
+
+    <BookmarkDeleteModal
+      v-model:open="isBulkDeleteModalOpen"
+      title=""
+      :count="selectedCount"
+      @confirm="handleBulkDelete"
     />
 
     <FeedAddModal

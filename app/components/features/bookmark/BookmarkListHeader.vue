@@ -6,13 +6,18 @@ interface Stats {
 
 interface Props {
   stats: Stats
+  isSelectionMode?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  isSelectionMode: false
+})
 
 const emit = defineEmits<{
   'add': []
   'manage-tags': []
+  'enter-selection': []
+  'exit-selection': []
 }>()
 </script>
 
@@ -41,6 +46,24 @@ const emit = defineEmits<{
       </div>
     </div>
     <div class="flex items-center gap-2">
+      <UButton
+        v-if="props.isSelectionMode"
+        variant="ghost"
+        color="neutral"
+        icon="i-heroicons-x-mark"
+        @click="emit('exit-selection')"
+      >
+        キャンセル
+      </UButton>
+      <UButton
+        v-else
+        variant="ghost"
+        color="neutral"
+        icon="i-heroicons-check-circle"
+        @click="emit('enter-selection')"
+      >
+        選択
+      </UButton>
       <UButton
         variant="ghost"
         color="neutral"
