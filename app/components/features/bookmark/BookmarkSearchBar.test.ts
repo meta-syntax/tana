@@ -112,4 +112,40 @@ describe('BookmarkSearchBar', () => {
     expect(wrapper.html()).toContain('queue-list')
     expect(wrapper.html()).toContain('list-bullet')
   })
+
+  it('hasActiveFilters=false時はクリアボタン非表示', async () => {
+    const wrapper = await mountSuspended(BookmarkSearchBar, {
+      props: {
+        ...defaultProps,
+        hasActiveFilters: false
+      }
+    })
+
+    expect(wrapper.html()).not.toContain('x-mark')
+  })
+
+  it('hasActiveFilters=true時はクリアボタン表示', async () => {
+    const wrapper = await mountSuspended(BookmarkSearchBar, {
+      props: {
+        ...defaultProps,
+        hasActiveFilters: true
+      }
+    })
+
+    expect(wrapper.html()).toContain('x-mark')
+  })
+
+  it('クリアボタン押下でclear-allイベント発火', async () => {
+    const wrapper = await mountSuspended(BookmarkSearchBar, {
+      props: {
+        ...defaultProps,
+        hasActiveFilters: true
+      }
+    })
+
+    const clearButton = wrapper.find('[aria-label="検索条件をクリア"]')
+    await clearButton.trigger('click')
+
+    expect(wrapper.emitted('clear-all')).toBeTruthy()
+  })
 })

@@ -1,9 +1,12 @@
 <script setup lang="ts">
 interface Props {
   title: string
+  count?: number
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  count: 1
+})
 
 const emit = defineEmits<{
   confirm: []
@@ -11,7 +14,11 @@ const emit = defineEmits<{
 
 const isOpen = defineModel<boolean>('open', { required: true })
 
-const modalTitle = 'ブックマークを削除'
+const isBulk = computed(() => props.count > 1)
+
+const modalTitle = computed(() =>
+  isBulk.value ? 'ブックマークを一括削除' : 'ブックマークを削除'
+)
 
 // タイトルを50文字に制限
 const truncatedTitle = computed(() => {
@@ -22,7 +29,9 @@ const truncatedTitle = computed(() => {
 
 // アクセシビリティのために必要（画面には表示されない）
 const modalDescription = computed(() =>
-  `「${truncatedTitle.value}」を削除しようとしています。この操作は取り消せません。`
+  isBulk.value
+    ? `${props.count}件のブックマークを削除しようとしています。この操作は取り消せません。`
+    : `「${truncatedTitle.value}」を削除しようとしています。この操作は取り消せません。`
 )
 
 const loading = ref(false)
@@ -63,7 +72,12 @@ watch(isOpen, (open) => {
             </h3>
             <div class="space-y-2">
               <p class="text-sm text-highlighted">
-                「<span class="font-medium">{{ truncatedTitle }}</span>」を削除しますか？
+                <template v-if="isBulk">
+                  <span class="font-medium">{{ count }}件</span>のブックマークを削除しますか？
+                </template>
+                <template v-else>
+                  「<span class="font-medium">{{ truncatedTitle }}</span>」を削除しますか？
+                </template>
               </p>
               <p class="modal-warning text-sm font-semibold text-red-600">
                 ⚠️ この操作は取り消せません。

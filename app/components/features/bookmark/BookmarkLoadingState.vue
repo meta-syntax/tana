@@ -1,6 +1,6 @@
 <script setup lang="ts">
 interface Props {
-  type: 'initial' | 'searching'
+  type: 'initial' | 'searching' | 'filtering'
 }
 
 defineProps<Props>()
@@ -89,7 +89,7 @@ const skeletonCount = computed(() => skeletonCounts[cardSize.value] ?? 6)
         />
       </div>
       <p class="text-sm text-gray-500">
-        検索中...
+        {{ type === 'filtering' ? '絞り込み中...' : '検索中...' }}
       </p>
     </div>
   </div>

@@ -136,6 +136,13 @@ html::-webkit-scrollbar-thumb:hover {
   cursor: grabbing;
 }
 
+/* モバイル: タッチターゲットの最小サイズ保証 */
+@media (pointer: coarse) {
+  .drag-handle {
+    min-width: 44px;
+  }
+}
+
 /* Page transition */
 .page-enter-active,
 .page-leave-active {

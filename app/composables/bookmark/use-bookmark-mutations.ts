@@ -35,6 +35,12 @@ export const useBookmarkMutations = (options: UseBookmarkMutationsOptions) => {
   const addBookmark = async (input: BookmarkInput): Promise<{ success: boolean, id: string | null }> => {
     if (!user.value?.sub) return { success: false, id: null }
 
+    // 既存アイテムの最小sort_orderより小さい値を計算（先頭に追加）
+    const minSortOrder = bookmarks.value.length > 0
+      ? Math.min(...bookmarks.value.map(b => b.sort_order))
+      : SORT_ORDER_GAP
+    const newSortOrder = minSortOrder - SORT_ORDER_GAP
+
     // 楽観的にローカルへ追加（仮ID）
     const optimisticBookmark: Bookmark = {
       id: crypto.randomUUID(),
@@ -45,7 +51,7 @@ export const useBookmarkMutations = (options: UseBookmarkMutationsOptions) => {
       thumbnail_url: input.thumbnail_url || null,
       rss_feed_id: null,
       summary: null,
-      sort_order: 0,
+      sort_order: newSortOrder,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     }
@@ -59,7 +65,7 @@ export const useBookmarkMutations = (options: UseBookmarkMutationsOptions) => {
         title: input.title || null,
         description: input.description || null,
         thumbnail_url: input.thumbnail_url || null,
-        sort_order: 0
+        sort_order: newSortOrder
       })
       .select('id')
       .single()
@@ -177,6 +183,49 @@ export const useBookmarkMutations = (options: UseBookmarkMutationsOptions) => {
     return true
   }
 
+  const bulkDeleteBookmarks = async (ids: string[]): Promise<boolean> => {
+    if (!user.value?.sub || ids.length === 0) return false
+
+    // スナップショット保存
+    const snapshot = [...bookmarks.value]
+
+    // 楽観的にローカルから削除
+    const idSet = new Set(ids)
+    bookmarks.value = bookmarks.value.filter(b => !idSet.has(b.id))
+
+    const { error } = await supabase
+      .from('bookmarks')
+      .delete()
+      .in('id', ids)
+
+    if (error) {
+      // ロールバック
+      bookmarks.value = snapshot
+      console.error('Failed to bulk delete bookmarks:', error)
+      toast.add({
+        title: 'エラー',
+        description: 'ブックマークの一括削除に失敗しました',
+        color: 'error'
+      })
+      return false
+    }
+
+    // 現在ページが空になったら前ページへ戻る
+    if (bookmarks.value.length === 0 && page.value > 1) {
+      page.value -= 1
+    }
+
+    await Promise.all([refreshBookmarks(), refreshStats()])
+
+    toast.add({
+      title: '削除完了',
+      description: `${ids.length}件のブックマークを削除しました`,
+      color: 'success'
+    })
+
+    return true
+  }
+
   // 並び替え
   const isReordering = ref(false)
 
@@ -201,9 +250,13 @@ export const useBookmarkMutations = (options: UseBookmarkMutationsOptions) => {
       const nextOrder = nextItem?.sort_order ?? null
       const newSortOrder = calcMidSortOrder(prevOrder, nextOrder)
 
+      // 全アイテムが同一sort_orderの場合もリバランス対象
+      const allSameSortOrder = new Set(newList.map(b => b.sort_order)).size <= 1
+
       // ギャップ枯渇チェック: 前後との差が最小ギャップ未満ならリバランス
       const needsRebalance
-        = (prevOrder !== null && Math.abs(newSortOrder - prevOrder) < MIN_GAP)
+        = allSameSortOrder
+          || (prevOrder !== null && Math.abs(newSortOrder - prevOrder) < MIN_GAP)
           || (nextOrder !== null && Math.abs(nextOrder - newSortOrder) < MIN_GAP)
 
       let updates: { id: string, sort_order: number }[]
@@ -222,7 +275,7 @@ export const useBookmarkMutations = (options: UseBookmarkMutationsOptions) => {
 
       if (error) throw error
 
-      // ローカルのsort_orderも更新
+      // ローカルのsort_orderも更新（RPC成功でサーバーは更新済み、refreshは不要）
       if (needsRebalance) {
         bookmarks.value = newList.map((b, i) => ({
           ...b,
@@ -250,6 +303,7 @@ export const useBookmarkMutations = (options: UseBookmarkMutationsOptions) => {
     addBookmark,
     updateBookmark,
     deleteBookmark,
+    bulkDeleteBookmarks,
     isReordering: readonly(isReordering),
     reorderBookmarks
   }

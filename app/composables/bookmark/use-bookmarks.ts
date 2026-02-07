@@ -21,7 +21,7 @@ export const useBookmarks = () => {
     = useBookmarkQuery({ supabase, user, page, perPage, searchQuery, sort, selectedTagIds })
 
   // ミューテーション
-  const { addBookmark, updateBookmark, deleteBookmark, isReordering, reorderBookmarks }
+  const { addBookmark, updateBookmark, deleteBookmark, bulkDeleteBookmarks, isReordering, reorderBookmarks }
     = useBookmarkMutations({ supabase, user, bookmarks, page, refreshBookmarks, refreshStats })
 
   // ドラッグ有効条件: sort_order && 検索なし && タグフィルターなし
@@ -74,6 +74,7 @@ export const useBookmarks = () => {
     addBookmark,
     updateBookmark,
     deleteBookmark,
+    bulkDeleteBookmarks,
     reorderBookmarks
   }
 }
